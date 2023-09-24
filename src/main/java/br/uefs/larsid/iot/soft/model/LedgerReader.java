@@ -15,7 +15,6 @@ import java.util.logging.Logger;
  */
 public class LedgerReader implements ILedgerReader {
 
-  private static int HTTP_SUCCESS = 200;
   private String urlApi;
   private static final Logger logger = Logger.getLogger(
     LedgerReader.class.getName()
@@ -42,7 +41,7 @@ public class LedgerReader implements ILedgerReader {
       url = new URL(String.format("%s/%s/%s", this.urlApi, endpoint, index));
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-      if (conn.getResponseCode() != HTTP_SUCCESS) {
+      if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
         throw new RuntimeException(
           "HTTP error code : " + conn.getResponseCode()
         );
