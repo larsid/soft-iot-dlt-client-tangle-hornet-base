@@ -7,10 +7,20 @@
 
 
     <service id="ILedgerReaderService" ref="ledgerReader" interface="br.uefs.larsid.iot.soft.services.ILedgerReader" />
+    <service id="ILedgerWriterService" ref="ledgerWriter" interface="br.uefs.larsid.iot.soft.services.ILedgerWriter" />
 
     <bean
         id="ledgerReader"
         class="br.uefs.larsid.iot.soft.model.LedgerReader"
+        init-method="start"
+        destroy-method="stop"
+    >
+        <property name="urlApi" value="${urlAPI}" />
+    </bean>
+
+    <bean
+        id="ledgerWriter"
+        class="br.uefs.larsid.iot.soft.model.LedgerWriter"
         init-method="start"
         destroy-method="stop"
     >
