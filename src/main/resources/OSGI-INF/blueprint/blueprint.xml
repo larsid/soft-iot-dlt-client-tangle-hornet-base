@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-           xsi:schemaLocation="
-             http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
-             http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
-    
-    <bean id="myBean" class="br.uefs.larsid.iot.soft.model.Service"/>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+    xsi:schemaLocation="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+                        http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-    <service ref="myBean" interface="br.uefs.larsid.iot.soft.services.IService"/>
+
+    <service id="ILedgerReaderService" ref="ledgerReader" interface="br.uefs.larsid.iot.soft.services.ILedgerReader" />
+
+    <bean
+        id="ledgerReader"
+        class="br.uefs.larsid.iot.soft.model.LedgerReader"
+        init-method="start"
+        destroy-method="stop"
+    >
+        <property name="urlApi" value="${urlAPI}" />
+    </bean>
+
+    <cm:property-placeholder
+        persistent-id="br.uefs.larsid.soft_iot.client_tangle_hornet"
+        update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="urlAPI" value="http://localhost:3000" />
+        </cm:default-properties>
+    </cm:property-placeholder>
 
 </blueprint>
