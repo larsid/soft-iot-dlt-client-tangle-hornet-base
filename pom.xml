@@ -9,7 +9,6 @@
     <packaging>bundle</packaging>
 
     <name>soft-iot-client-tangle-hornet</name>
-    <description>simple-blueprint-bundle OSGi blueprint bundle project.</description>
 
     <build>
         <plugins>
