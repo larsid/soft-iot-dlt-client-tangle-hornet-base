@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>br.uefs.larsid.iot.soft</groupId>
-    <artifactId>soft-iot-client-tangle-hornet</artifactId>
+    <artifactId>soft-iot-dlt-client-tangle-hornet</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
-    <name>soft-iot-client-tangle-hornet</name>
+    <name>SOFT-IoT-DLT-Client-Tangle-Hornet</name>
 
     <build>
         <plugins>
