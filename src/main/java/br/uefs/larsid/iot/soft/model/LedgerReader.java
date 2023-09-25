@@ -23,7 +23,7 @@ public class LedgerReader implements ILedgerReader {
 
   public void start() {
     // TODO: Temporário, remover depois
-    this.getMessageByIndex("LB_ENTRY_REPLY");
+    logger.info(this.getMessagesByIndex("LB_ENTRY_REPLY"));
   }
 
   public void stop() {
@@ -36,7 +36,7 @@ public class LedgerReader implements ILedgerReader {
    *
    * @param index String - Message index
    */
-  public String getMessageByIndex(String index) {
+  public String getMessagesByIndex(String index) {
     String endpoint = "message";
     URL url;
     String response = null;
