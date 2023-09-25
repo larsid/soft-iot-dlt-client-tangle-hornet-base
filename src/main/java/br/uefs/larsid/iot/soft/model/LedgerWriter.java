@@ -10,21 +10,45 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
 public class LedgerWriter implements ILedgerWriter {
 
   private String urlApi;
   private boolean debugModeValue;
+
+  private final BlockingQueue<Transaction> DLTOutboundBuffer;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
   );
 
+  public LedgerWriter(int bufferSize) {
+    this.DLTOutboundBuffer = new ArrayBlockingQueue<Transaction>(bufferSize);
+  }
+
   public void start() {
-    // TODO: Temporário, remover depois
+    // TODO: Temporário, alterar para inicialização da thread
     Gson gson = new Gson();
     Transaction transaction = new Status("source", "group", true, 2, 3, false);
-    this.createMessage("LB_ENTRY", gson.toJson(transaction));
+
+    Transaction transactionByQueue;
+    try {
+      transactionByQueue = this.DLTOutboundBuffer.take();
+      transactionByQueue.setPublishedAt(System.currentTimeMillis());
+
+      String transactionByQueueJson = gson.toJson(transaction);
+
+      this.createMessage(
+          transactionByQueue.getType().name(),
+          transactionByQueueJson
+        );
+    } catch (InterruptedException ie) {
+      if (debugModeValue) {
+        logger.severe(ie.getMessage());
+      }
+    }
   }
 
   public void stop() {
@@ -34,12 +58,11 @@ public class LedgerWriter implements ILedgerWriter {
 
   @Override
   public void put(Transaction transaction) throws InterruptedException {
-    // TODO: Implementar o método juntamente com a thread
-    throw new UnsupportedOperationException("Unimplemented method 'put'");
+    this.DLTOutboundBuffer.put(transaction);
   }
 
   public void createMessage(String index, String content) {
-    String endpoint = "message";
+    String endpoint = "message"; // TODO: Colocar em uma constante ou arquivo de configuração
     URL url;
 
     try {
@@ -102,7 +125,8 @@ public class LedgerWriter implements ILedgerWriter {
     }
   }
 
-  public String getUrlApi() {
+  @Override
+  public String getUrl() {
     return urlApi;
   }
 
