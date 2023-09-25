@@ -41,24 +41,15 @@ public class LedgerWriter implements ILedgerWriter {
     URL url;
 
     try {
-      // URL do endpoint
       url = new URL(String.format("%s/%s", this.urlApi, endpoint));
 
       // Abrir conexão HTTP
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-      // Configurar o método HTTP para POST
       connection.setRequestMethod("POST");
-
-      // Configurar cabeçalhos da requisição (opcional)
       connection.setRequestProperty("Content-Type", "application/json");
+      connection.setDoOutput(true); // Permitir a escrita no corpo da requisição
 
-      // Permitir a escrita no corpo da requisição
-      connection.setDoOutput(true);
-
-      logger.info(content);
-
-      // Corpo da requisição
       String requestBody = String.format(
         "{\"index\": \"%s\",\"content\": %s}",
         index,
