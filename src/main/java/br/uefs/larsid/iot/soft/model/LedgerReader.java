@@ -15,11 +15,14 @@ import java.util.logging.Logger;
  */
 public class LedgerReader implements ILedgerReader {
 
-  private String urlApi;
   private boolean debugModeValue;
+
+  private String urlApi;
   private static final Logger logger = Logger.getLogger(
     LedgerReader.class.getName()
   );
+
+  private static final String ENDPOINT = "message";
 
   public LedgerReader(String protocol, String url, int port) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
@@ -41,12 +44,12 @@ public class LedgerReader implements ILedgerReader {
    * @param index String - Message index
    */
   public String getMessagesByIndex(String index) {
-    String endpoint = "message";
-    URL url;
     String response = null;
 
     try {
-      url = new URL(String.format("%s/%s/%s", this.urlApi, endpoint, index));
+      URL url = new URL(
+        String.format("%s/%s/%s", this.urlApi, ENDPOINT, index)
+      );
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
       if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {

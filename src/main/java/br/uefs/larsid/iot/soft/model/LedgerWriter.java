@@ -22,13 +22,15 @@ import java.util.logging.Logger;
  */
 public class LedgerWriter implements ILedgerWriter {
 
-  private String urlApi;
   private boolean debugModeValue;
 
+  private String urlApi;
   private final BlockingQueue<Transaction> DLTOutboundBuffer;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
   );
+
+  private static final String ENDPOINT = "message";
 
   public LedgerWriter(String protocol, String url, int port, int bufferSize) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
@@ -87,11 +89,8 @@ public class LedgerWriter implements ILedgerWriter {
   }
 
   public void createMessage(String index, String content) {
-    String endpoint = "message"; // TODO: Colocar em uma constante ou arquivo de configuração
-    URL url;
-
     try {
-      url = new URL(String.format("%s/%s", this.urlApi, endpoint));
+      URL url = new URL(String.format("%s/%s", this.urlApi, ENDPOINT));
 
       // Abrir conexão HTTP
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
