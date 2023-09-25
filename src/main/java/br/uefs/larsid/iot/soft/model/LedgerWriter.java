@@ -60,7 +60,7 @@ public class LedgerWriter implements ILedgerWriter {
 
       // Corpo da requisição
       String requestBody = String.format(
-        "{\"index\": \"%s\",\"content\": %s}", //TODO: Permitir na API content como um JSON
+        "{\"index\": \"%s\",\"content\": %s}",
         index,
         content
       );
