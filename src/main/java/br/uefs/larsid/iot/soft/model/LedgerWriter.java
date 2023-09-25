@@ -31,19 +31,32 @@ public class LedgerWriter implements ILedgerWriter {
   public void start() {
     // TODO: Temporário, alterar para inicialização da thread
     Gson gson = new Gson();
-    Transaction transaction = new Status("source", "group", true, 2, 3, false);
+    Transaction transaction1 = new Status("source", "group", true, 2, 3, false);
+    Transaction transaction2 = new Status(
+      "source2",
+      "group2",
+      false,
+      3,
+      4,
+      true
+    );
 
     Transaction transactionByQueue;
     try {
-      transactionByQueue = this.DLTOutboundBuffer.take();
-      transactionByQueue.setPublishedAt(System.currentTimeMillis());
+      this.put(transaction1);
+      this.put(transaction2);
 
-      String transactionByQueueJson = gson.toJson(transaction);
+      while (this.DLTOutboundBuffer.size() > 0) {
+        transactionByQueue = this.DLTOutboundBuffer.take();
+        transactionByQueue.setPublishedAt(System.currentTimeMillis());
 
-      this.createMessage(
-          transactionByQueue.getType().name(),
-          transactionByQueueJson
-        );
+        String transactionByQueueJson = gson.toJson(transactionByQueue);
+
+        this.createMessage(
+            transactionByQueue.getType().name(),
+            transactionByQueueJson
+          );
+      }
     } catch (InterruptedException ie) {
       if (debugModeValue) {
         logger.severe(ie.getMessage());
