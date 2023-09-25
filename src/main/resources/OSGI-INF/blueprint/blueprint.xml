@@ -27,6 +27,7 @@
         init-method="start"
         destroy-method="stop"
     >
+        <argument value="${BUFFER_MAX_LEN}"/>
         <property name="debugModeValue" value="${debugModeValue}" />
         <property name="urlApi" value="${urlAPI}" />
     </bean>
@@ -36,6 +37,7 @@
         update-strategy="reload">
         <cm:default-properties>
             <cm:property name="urlAPI" value="http://localhost:3000" />
+            <cm:property name="BUFFER_MAX_LEN" value="128" />
             <cm:property name="debugModeValue" value="true" />
         </cm:default-properties>
     </cm:property-placeholder>
