@@ -1,5 +1,7 @@
 package br.uefs.larsid.iot.soft.model;
 
+import br.uefs.larsid.iot.soft.enums.TransactionType;
+import br.uefs.larsid.iot.soft.model.transactions.Evaluation;
 import br.uefs.larsid.iot.soft.model.transactions.Status;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerWriter;
@@ -14,6 +16,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
+/**
+ * @author Allan Capistrano
+ * @version 1.0.0
+ */
 public class LedgerWriter implements ILedgerWriter {
 
   private String urlApi;
@@ -24,17 +30,23 @@ public class LedgerWriter implements ILedgerWriter {
     LedgerWriter.class.getName()
   );
 
-  public LedgerWriter(int bufferSize) {
+  public LedgerWriter(String protocol, String url, int port, int bufferSize) {
+    this.urlApi = String.format("%s://%s:%s", protocol, url, port);
     this.DLTOutboundBuffer = new ArrayBlockingQueue<Transaction>(bufferSize);
   }
 
   public void start() {
     // TODO: Temporário, alterar para inicialização da thread
     Gson gson = new Gson();
-    Transaction transaction1 = new Status("source", "group", true, 2, 3, false);
+    Transaction transaction1 = new Evaluation(
+      "source",
+      "target",
+      TransactionType.REP_EVALUATION, //TODO: Somente a transação de STATUS está com o type correto
+      1
+    );
     Transaction transaction2 = new Status(
-      "source2",
-      "group2",
+      "source4",
+      "group4",
       false,
       3,
       4,

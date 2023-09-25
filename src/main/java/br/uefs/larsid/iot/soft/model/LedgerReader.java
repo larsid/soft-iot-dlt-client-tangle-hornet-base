@@ -21,6 +21,10 @@ public class LedgerReader implements ILedgerReader {
     LedgerReader.class.getName()
   );
 
+  public LedgerReader(String protocol, String url, int port) {
+    this.urlApi = String.format("%s://%s:%s", protocol, url, port);
+  }
+
   public void start() {
     // TODO: Temporário, remover depois
     logger.info(this.getMessagesByIndex("LB_ENTRY_REPLY"));
