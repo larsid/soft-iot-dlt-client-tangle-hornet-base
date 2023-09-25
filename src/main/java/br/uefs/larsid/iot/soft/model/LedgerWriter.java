@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 public class LedgerWriter implements ILedgerWriter {
 
   private String urlApi;
+  private boolean debugModeValue;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
   );
@@ -27,6 +28,7 @@ public class LedgerWriter implements ILedgerWriter {
   }
 
   public void stop() {
+    // TODO: Temporário, remover depois
     logger.info("Finishing the soft-iot-dlt-client-tangle-hornet");
   }
 
@@ -82,17 +84,21 @@ public class LedgerWriter implements ILedgerWriter {
         }
         in.close();
 
-        // A resposta da API está em 'response.toString()'
-        logger.info("Resposta da API: " + response.toString());
+        if (debugModeValue) {
+          logger.info("API response: " + response.toString());
+        }
       } else {
-        // Tratar erros aqui, se necessário
-        logger.info("Erro na requisição HTTP: " + responseCode);
+        if (debugModeValue) {
+          logger.info("Error in HTTP request: " + responseCode);
+        }
       }
 
       // Fechar a conexão
       connection.disconnect();
     } catch (IOException ioe) {
-      logger.severe(ioe.getMessage());
+      if (debugModeValue) {
+        logger.severe(ioe.getMessage());
+      }
     }
   }
 
@@ -102,5 +108,9 @@ public class LedgerWriter implements ILedgerWriter {
 
   public void setUrlApi(String urlApi) {
     this.urlApi = urlApi;
+  }
+
+  public void setDebugModeValue(boolean debugModeValue) {
+    this.debugModeValue = debugModeValue;
   }
 }

@@ -6,8 +6,10 @@
                         http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
 
-    <service id="ILedgerReaderService" ref="ledgerReader" interface="br.uefs.larsid.iot.soft.services.ILedgerReader" />
-    <service id="ILedgerWriterService" ref="ledgerWriter" interface="br.uefs.larsid.iot.soft.services.ILedgerWriter" />
+    <service id="ILedgerReaderService" ref="ledgerReader"
+        interface="br.uefs.larsid.iot.soft.services.ILedgerReader" />
+    <service id="ILedgerWriterService" ref="ledgerWriter"
+        interface="br.uefs.larsid.iot.soft.services.ILedgerWriter" />
 
     <bean
         id="ledgerReader"
@@ -15,6 +17,7 @@
         init-method="start"
         destroy-method="stop"
     >
+        <property name="debugModeValue" value="${debugModeValue}" />
         <property name="urlApi" value="${urlAPI}" />
     </bean>
 
@@ -24,6 +27,7 @@
         init-method="start"
         destroy-method="stop"
     >
+        <property name="debugModeValue" value="${debugModeValue}" />
         <property name="urlApi" value="${urlAPI}" />
     </bean>
 
@@ -32,6 +36,7 @@
         update-strategy="reload">
         <cm:default-properties>
             <cm:property name="urlAPI" value="http://localhost:3000" />
+            <cm:property name="debugModeValue" value="true" />
         </cm:default-properties>
     </cm:property-placeholder>
 

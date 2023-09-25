@@ -16,15 +16,18 @@ import java.util.logging.Logger;
 public class LedgerReader implements ILedgerReader {
 
   private String urlApi;
+  private boolean debugModeValue;
   private static final Logger logger = Logger.getLogger(
     LedgerReader.class.getName()
   );
 
   public void start() {
+    // TODO: Temporário, remover depois
     this.getMessageByIndex("LB_ENTRY_REPLY");
   }
 
   public void stop() {
+    // TODO: Temporário, remover depois
     logger.info("Finishing the soft-iot-dlt-client-tangle-hornet");
   }
 
@@ -33,9 +36,10 @@ public class LedgerReader implements ILedgerReader {
    *
    * @param index String - Message index
    */
-  public void getMessageByIndex(String index) {
+  public String getMessageByIndex(String index) {
     String endpoint = "message";
     URL url;
+    String response = null;
 
     try {
       url = new URL(String.format("%s/%s/%s", this.urlApi, endpoint, index));
@@ -52,7 +56,6 @@ public class LedgerReader implements ILedgerReader {
       );
 
       String temp = null;
-      String response = null;
 
       while ((temp = br.readLine()) != null) {
         response = temp;
@@ -60,12 +63,18 @@ public class LedgerReader implements ILedgerReader {
 
       conn.disconnect();
 
-      logger.info(response);
+      return response;
     } catch (MalformedURLException mue) {
-      logger.severe(mue.getMessage());
+      if (debugModeValue) {
+        logger.severe(mue.getMessage());
+      }
     } catch (IOException ioe) {
-      logger.severe(ioe.getMessage());
+      if (debugModeValue) {
+        logger.severe(ioe.getMessage());
+      }
     }
+
+    return response;
   }
 
   public String getUrlApi() {
@@ -74,5 +83,9 @@ public class LedgerReader implements ILedgerReader {
 
   public void setUrlApi(String urlApi) {
     this.urlApi = urlApi;
+  }
+
+  public void setDebugModeValue(boolean debugModeValue) {
+    this.debugModeValue = debugModeValue;
   }
 }
