@@ -1,7 +1,5 @@
 package br.uefs.larsid.iot.soft.model;
 
-import br.uefs.larsid.iot.soft.enums.TransactionType;
-import br.uefs.larsid.iot.soft.model.transactions.Evaluation;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerWriter;
 import com.google.gson.Gson;
