@@ -6,4 +6,6 @@ package br.uefs.larsid.iot.soft.services;
  */
 public interface ILedgerReader {
   public String getMessagesByIndex(String index);
+
+  public String getMessageByMessageId(String messageId);
 }
