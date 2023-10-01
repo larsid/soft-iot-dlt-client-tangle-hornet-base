@@ -1,6 +1,7 @@
 package br.uefs.larsid.iot.soft.model;
 
-import br.uefs.larsid.iot.soft.model.transactions.Status;
+import br.uefs.larsid.iot.soft.enums.TransactionType;
+import br.uefs.larsid.iot.soft.model.transactions.Evaluation;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerWriter;
 import com.google.gson.Gson;
@@ -10,40 +11,88 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
-public class LedgerWriter implements ILedgerWriter {
+/**
+ * @author Allan Capistrano
+ * @version 1.0.0
+ */
+public class LedgerWriter implements ILedgerWriter, Runnable {
+
+  private boolean debugModeValue;
 
   private String urlApi;
-  private boolean debugModeValue;
+  private Thread DLTOutboundMonitor;
+  private final BlockingQueue<Transaction> DLTOutboundBuffer;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
   );
 
+  private static final String ENDPOINT = "message";
+
+  public LedgerWriter(String protocol, String url, int port, int bufferSize) {
+    this.urlApi = String.format("%s://%s:%s", protocol, url, port);
+    this.DLTOutboundBuffer = new ArrayBlockingQueue<Transaction>(bufferSize);
+  }
+
   public void start() {
-    // TODO: Temporário, remover depois
-    Gson gson = new Gson();
-    Transaction transaction = new Status("source", "group", true, 2, 3, false);
-    this.createMessage("LB_ENTRY", gson.toJson(transaction));
+    logger.info("Starting LedgerWriter");
+
+    if (this.DLTOutboundMonitor == null) {
+      this.DLTOutboundMonitor = new Thread(this);
+      this.DLTOutboundMonitor.setName(
+          "CLIENT_TANGLE_HORNET/DLT_OUTBOUND_MONITOR"
+        );
+      this.DLTOutboundMonitor.start();
+    }
+
+    Transaction transaction1 = new Evaluation(
+      "source_teste",
+      "target_teste",
+      TransactionType.REP_EVALUATION,
+      1
+    );
+    try {
+      this.put(transaction1);
+    } catch (InterruptedException ie) {
+      if (debugModeValue) {
+        logger.severe(ie.getMessage());
+      }
+    }
   }
 
   public void stop() {
-    // TODO: Temporário, remover depois
-    logger.info("Finishing the soft-iot-dlt-client-tangle-hornet");
+    this.DLTOutboundMonitor.interrupt();
+  }
+
+  @Override
+  public void run() {
+    Gson gson = new Gson();
+
+    while (!this.DLTOutboundMonitor.isInterrupted()) {
+      try {
+        Transaction transaction = this.DLTOutboundBuffer.take();
+        transaction.setPublishedAt(System.currentTimeMillis());
+
+        String transactionJson = gson.toJson(transaction);
+
+        this.createMessage(transaction.getType().name(), transactionJson);
+      } catch (InterruptedException ex) {
+        this.DLTOutboundMonitor.interrupt();
+      }
+    }
   }
 
   @Override
   public void put(Transaction transaction) throws InterruptedException {
-    // TODO: Implementar o método juntamente com a thread
-    throw new UnsupportedOperationException("Unimplemented method 'put'");
+    this.DLTOutboundBuffer.put(transaction);
   }
 
   public void createMessage(String index, String content) {
-    String endpoint = "message";
-    URL url;
-
     try {
-      url = new URL(String.format("%s/%s", this.urlApi, endpoint));
+      URL url = new URL(String.format("%s/%s", this.urlApi, ENDPOINT));
 
       // Abrir conexão HTTP
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -102,7 +151,8 @@ public class LedgerWriter implements ILedgerWriter {
     }
   }
 
-  public String getUrlApi() {
+  @Override
+  public String getUrl() {
     return urlApi;
   }
 

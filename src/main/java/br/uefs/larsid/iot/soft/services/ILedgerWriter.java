@@ -9,5 +9,5 @@ import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 public interface ILedgerWriter {
   public void put(Transaction transaction) throws InterruptedException;
 
-  public void createMessage(String index, String content);
+  public String getUrl();
 }
