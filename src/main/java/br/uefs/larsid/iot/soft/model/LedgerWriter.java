@@ -43,7 +43,7 @@ public class LedgerWriter implements ILedgerWriter {
     Transaction transaction1 = new Evaluation(
       "source",
       "target",
-      TransactionType.REP_EVALUATION, //TODO: Somente a transação de STATUS está com o type correto
+      TransactionType.REP_EVALUATION,
       1
     );
     Transaction transaction2 = new Status(
