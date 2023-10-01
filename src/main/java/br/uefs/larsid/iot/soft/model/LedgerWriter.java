@@ -2,7 +2,6 @@ package br.uefs.larsid.iot.soft.model;
 
 import br.uefs.larsid.iot.soft.enums.TransactionType;
 import br.uefs.larsid.iot.soft.model.transactions.Evaluation;
-import br.uefs.larsid.iot.soft.model.transactions.Status;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerWriter;
 import com.google.gson.Gson;
@@ -20,11 +19,12 @@ import java.util.logging.Logger;
  * @author Allan Capistrano
  * @version 1.0.0
  */
-public class LedgerWriter implements ILedgerWriter {
+public class LedgerWriter implements ILedgerWriter, Runnable {
 
   private boolean debugModeValue;
 
   private String urlApi;
+  private Thread DLTOutboundMonitor;
   private final BlockingQueue<Transaction> DLTOutboundBuffer;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
@@ -38,39 +38,24 @@ public class LedgerWriter implements ILedgerWriter {
   }
 
   public void start() {
-    // TODO: Temporário, alterar para inicialização da thread
-    Gson gson = new Gson();
+    logger.info("Starting LedgerWriter");
+
+    if (this.DLTOutboundMonitor == null) {
+      this.DLTOutboundMonitor = new Thread(this);
+      this.DLTOutboundMonitor.setName(
+          "CLIENT_TANGLE_HORNET/DLT_OUTBOUND_MONITOR"
+        );
+      this.DLTOutboundMonitor.start();
+    }
+
     Transaction transaction1 = new Evaluation(
-      "source",
-      "target",
+      "source_teste",
+      "target_teste",
       TransactionType.REP_EVALUATION,
       1
     );
-    Transaction transaction2 = new Status(
-      "source4",
-      "group4",
-      false,
-      3,
-      4,
-      true
-    );
-
-    Transaction transactionByQueue;
     try {
       this.put(transaction1);
-      this.put(transaction2);
-
-      while (this.DLTOutboundBuffer.size() > 0) {
-        transactionByQueue = this.DLTOutboundBuffer.take();
-        transactionByQueue.setPublishedAt(System.currentTimeMillis());
-
-        String transactionByQueueJson = gson.toJson(transactionByQueue);
-
-        this.createMessage(
-            transactionByQueue.getType().name(),
-            transactionByQueueJson
-          );
-      }
     } catch (InterruptedException ie) {
       if (debugModeValue) {
         logger.severe(ie.getMessage());
@@ -79,8 +64,25 @@ public class LedgerWriter implements ILedgerWriter {
   }
 
   public void stop() {
-    // TODO: Temporário, remover depois
-    logger.info("Finishing the soft-iot-dlt-client-tangle-hornet");
+    this.DLTOutboundMonitor.interrupt();
+  }
+
+  @Override
+  public void run() {
+    Gson gson = new Gson();
+
+    while (!this.DLTOutboundMonitor.isInterrupted()) {
+      try {
+        Transaction transaction = this.DLTOutboundBuffer.take();
+        transaction.setPublishedAt(System.currentTimeMillis());
+
+        String transactionJson = gson.toJson(transaction);
+
+        this.createMessage(transaction.getType().name(), transactionJson);
+      } catch (InterruptedException ex) {
+        this.DLTOutboundMonitor.interrupt();
+      }
+    }
   }
 
   @Override
