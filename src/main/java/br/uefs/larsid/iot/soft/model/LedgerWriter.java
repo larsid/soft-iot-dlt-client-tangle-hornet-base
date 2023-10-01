@@ -47,20 +47,6 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         );
       this.DLTOutboundMonitor.start();
     }
-
-    Transaction transaction1 = new Evaluation(
-      "source_teste",
-      "target_teste",
-      TransactionType.REP_EVALUATION,
-      1
-    );
-    try {
-      this.put(transaction1);
-    } catch (InterruptedException ie) {
-      if (debugModeValue) {
-        logger.severe(ie.getMessage());
-      }
-    }
   }
 
   public void stop() {
