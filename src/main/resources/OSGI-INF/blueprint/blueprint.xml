@@ -12,6 +12,17 @@
         interface="br.uefs.larsid.iot.soft.services.ILedgerWriter" />
 
     <bean
+        id="ZMQServer"
+        class="br.uefs.larsid.iot.soft.model.ZMQServer"
+        init-method="start"
+        destroy-method="stop">
+        <argument value="${BUFFER_MAX_LEN}" />
+        <argument value="${ZMQ_SOCKET_PROTOCOL}" />
+        <argument value="${ZMQ_SOCKET_URL}" />
+        <argument value="${ZMQ_SOCKET_PORT}" />
+    </bean>
+
+    <bean
         id="ledgerReader"
         class="br.uefs.larsid.iot.soft.model.LedgerReader"
         init-method="start"
@@ -20,6 +31,7 @@
         <argument value="${DLT_PROTOCOL}" />
         <argument value="${DLT_URL}" />
         <argument value="${DLT_PORT}" />
+        <property name="server" ref="ZMQServer" />
         <property name="debugModeValue" value="${debugModeValue}" />
     </bean>
 
@@ -41,9 +53,12 @@
         update-strategy="reload">
         <cm:default-properties>
             <cm:property name="DLT_PROTOCOL" value="http" />
-            <cm:property name="DLT_URL" value="localhost" />
+            <cm:property name="DLT_URL" value="127.0.0.1" />
             <cm:property name="DLT_PORT" value="3000" />
             <cm:property name="BUFFER_MAX_LEN" value="128" />
+            <cm:property name="ZMQ_SOCKET_PROTOCOL" value="tcp" />
+            <cm:property name="ZMQ_SOCKET_URL" value="172.18.0.1" />
+            <cm:property name="ZMQ_SOCKET_PORT" value="5556" />
             <cm:property name="debugModeValue" value="true" />
         </cm:default-properties>
     </cm:property-placeholder>
