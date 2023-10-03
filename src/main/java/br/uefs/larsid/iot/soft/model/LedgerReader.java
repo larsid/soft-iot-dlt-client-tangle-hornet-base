@@ -1,5 +1,6 @@
 package br.uefs.larsid.iot.soft.model;
 
+import br.uefs.larsid.iot.soft.model.tangle.hornet.ApiMessage;
 import br.uefs.larsid.iot.soft.model.tangle.hornet.Message;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerReader;
@@ -44,12 +45,14 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
   public void start() {
     // TODO: Temporário, remover depois
-    // logger.info(this.getMessagesByIndex("LB_ENTRY_REPLY"));
-    // logger.info(
-    //   this.getMessageByMessageId(
-    //       "1ce1acc6b9d6fc82713cac49356fd693d9aec070ea20a8b671ace6416477962f"
-    //     )
-    // );
+    logger.info(this.getMessagesByIndex("LB_STATUS"));
+    logger.info(
+      this.getMessageByMessageId(
+          "fc765ed8c6a95ca200997cd0cb18e811294ee7a9c84ea0ec9d6544ed16495328"
+        )
+        .getType()
+        .name()
+    );
 
     if (this.DLTInboundMonitor == null) {
       this.DLTInboundMonitor = new Thread(this);
@@ -116,10 +119,11 @@ public class LedgerReader implements ILedgerReader, Runnable {
    * @param messageId String - Message ID.
    */
   @Override
-  public String getMessageByMessageId(String messageId) { // TODO: Renomear para transactions
+  public Transaction getMessageByMessageId(String messageId) { // TODO: Renomear para transactions
     String response = null;
 
     try {
+      Gson gson = new Gson();
       URL url = new URL(
         String.format("%s/%s/%s/", this.urlApi, ENDPOINT_MESSAGE_ID, messageId)
       );
@@ -143,7 +147,9 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       conn.disconnect();
 
-      return response;
+      ApiMessage message = gson.fromJson(response, ApiMessage.class);
+
+      return Transaction.getTransactionObjectByType(message.getContent());
     } catch (MalformedURLException mue) {
       if (debugModeValue) {
         logger.severe(mue.getMessage());
@@ -154,7 +160,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
       }
     }
 
-    return response;
+    return null;
   }
 
   @Override
