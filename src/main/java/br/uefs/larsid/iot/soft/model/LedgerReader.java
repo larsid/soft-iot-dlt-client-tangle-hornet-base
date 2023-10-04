@@ -2,18 +2,23 @@ package br.uefs.larsid.iot.soft.model;
 
 import br.uefs.larsid.iot.soft.model.tangle.hornet.ApiMessage;
 import br.uefs.larsid.iot.soft.model.tangle.hornet.Message;
+import br.uefs.larsid.iot.soft.model.transactions.Status;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerReader;
 import br.uefs.larsid.iot.soft.services.ILedgerSubscriber;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -45,10 +50,13 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
   public void start() {
     // TODO: Temporário, remover depois
-    logger.info(this.getMessagesByIndex("LB_STATUS"));
+    logger.info(
+      "AVAILABLE: " +
+      ((Status) this.getMessagesByIndex("LB_STATUS").get(0)).getAvailable()
+    );
     logger.info(
       this.getMessageByMessageId(
-          "fc765ed8c6a95ca200997cd0cb18e811294ee7a9c84ea0ec9d6544ed16495328"
+          "d57c9ad40b7079fd8e36cd3d127b3aed9fff7e3f293f1fe1913b4d850ba0814d"
         )
         .getType()
         .name()
@@ -72,8 +80,9 @@ public class LedgerReader implements ILedgerReader, Runnable {
    * @param index String - Message index
    */
   @Override
-  public String getMessagesByIndex(String index) { // TODO: Renomear para transactions
+  public List<Transaction> getMessagesByIndex(String index) { // TODO: Renomear para transactions
     String response = null;
+    List<Transaction> transactions = new ArrayList<Transaction>();
 
     try {
       URL url = new URL(
@@ -99,7 +108,21 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       conn.disconnect();
 
-      return response;
+      //  TODO: Criar uma função para isso.
+      Gson gson = new Gson();
+      Type listType = new TypeToken<ArrayList<ApiMessage>>() {}.getType();
+      ArrayList<ApiMessage> myObjects = gson.fromJson(response, listType);
+
+      for (ApiMessage myObject : myObjects) { // TODO: Refatorar esse laço
+        transactions.add(
+          Transaction.getTransactionObjectByType(
+            myObject.getContent(),
+            debugModeValue
+          )
+        );
+      }
+
+      return transactions;
     } catch (MalformedURLException mue) {
       if (debugModeValue) {
         logger.severe(mue.getMessage());
@@ -110,7 +133,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
       }
     }
 
-    return response;
+    return transactions;
   }
 
   /**
@@ -147,9 +170,13 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       conn.disconnect();
 
+      //  TODO: Criar uma função para isso.
       ApiMessage message = gson.fromJson(response, ApiMessage.class);
 
-      return Transaction.getTransactionObjectByType(message.getContent());
+      return Transaction.getTransactionObjectByType(
+        message.getContent(),
+        debugModeValue
+      );
     } catch (MalformedURLException mue) {
       if (debugModeValue) {
         logger.severe(mue.getMessage());
@@ -208,7 +235,8 @@ public class LedgerReader implements ILedgerReader, Runnable {
           notifyAll(
             topic,
             Transaction.getTransactionObjectByType(
-              message.getPayload().getData()
+              message.getPayload().getData(),
+              debugModeValue
             ),
             message.getId()
           );
