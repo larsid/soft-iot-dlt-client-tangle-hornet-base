@@ -36,11 +36,17 @@ public class Transaction {
    * Get a transaction object by the field 'type' in the JSON.
    *
    * @param transactionJSON String - JSON in string.
+   * @param debugModeValue boolean - Toggle log messages.
    * @return Transaction
    */
-  public static Transaction getTransactionObjectByType(String transactionJSON) {
-    logger.info("JSON Message");
-    logger.info(transactionJSON);
+  public static Transaction getTransactionObjectByType(
+    String transactionJSON,
+    boolean debugModeValue
+  ) {
+    if (debugModeValue) {
+      logger.info("JSON Message");
+      logger.info(transactionJSON);
+    }
 
     JsonReader reader = new JsonReader(new StringReader(transactionJSON));
 
