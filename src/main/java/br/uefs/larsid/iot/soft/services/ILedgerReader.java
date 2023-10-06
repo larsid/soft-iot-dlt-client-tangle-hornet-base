@@ -9,9 +9,9 @@ import br.uefs.larsid.iot.soft.model.transactions.Transaction;
  * @version 1.0.0
  */
 public interface ILedgerReader {
-  public List<Transaction> getMessagesByIndex(String index);
+  public List<Transaction> getTransactionsByIndex(String index);
 
-  public Transaction getMessageByMessageId(String messageId);
+  public Transaction getTransactionById(String messageId);
 
   public void subscribe(String topic, ILedgerSubscriber subscriber);
 

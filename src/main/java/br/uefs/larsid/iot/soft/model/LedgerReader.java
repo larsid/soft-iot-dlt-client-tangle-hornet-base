@@ -50,10 +50,10 @@ public class LedgerReader implements ILedgerReader, Runnable {
     // TODO: Temporário, remover depois
     logger.info(
       "AVAILABLE: " +
-      ((Status) this.getMessagesByIndex("LB_STATUS").get(0)).getAvailable()
+      ((Status) this.getTransactionsByIndex("LB_STATUS").get(0)).getAvailable()
     );
     logger.info(
-      this.getMessageByMessageId(
+      this.getTransactionById(
           "1ce1acc6b9d6fc82713cac49356fd693d9aec070ea20a8b671ace6416477962f"
         )
         .getType()
@@ -73,12 +73,12 @@ public class LedgerReader implements ILedgerReader, Runnable {
   }
 
   /**
-   * Get all messages by a given index.
+   * Get all transactions by a given index.
    *
    * @param index String - Message index
    */
   @Override
-  public List<Transaction> getMessagesByIndex(String index) { // TODO: Renomear para transactions
+  public List<Transaction> getTransactionsByIndex(String index) {
     String response = null;
     List<Transaction> transactions = new ArrayList<Transaction>();
 
@@ -124,18 +124,22 @@ public class LedgerReader implements ILedgerReader, Runnable {
   }
 
   /**
-   * Get a message by a given message ID.
+   * Get a transaction by a given transaction ID.
    *
-   * @param messageId String - Message ID.
+   * @param transactionId String - transaction ID.
    */
   @Override
-  public Transaction getMessageByMessageId(String messageId) { // TODO: Renomear para transactions
+  public Transaction getTransactionById(String transactionId) {
     String response = null;
 
     try {
-      // Gson gson = new Gson();
       URL url = new URL(
-        String.format("%s/%s/%s/", this.urlApi, ENDPOINT_MESSAGE_ID, messageId)
+        String.format(
+          "%s/%s/%s/",
+          this.urlApi,
+          ENDPOINT_MESSAGE_ID,
+          transactionId
+        )
       );
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
