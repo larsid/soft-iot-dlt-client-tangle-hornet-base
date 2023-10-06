@@ -1,7 +1,7 @@
 package br.uefs.larsid.iot.soft.model;
 
-import br.uefs.larsid.iot.soft.model.tangle.hornet.ApiMessage;
 import br.uefs.larsid.iot.soft.model.tangle.hornet.Message;
+import br.uefs.larsid.iot.soft.model.tangle.hornet.Payload;
 import br.uefs.larsid.iot.soft.model.transactions.Status;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerReader;
@@ -56,7 +56,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
     );
     logger.info(
       this.getMessageByMessageId(
-          "d57c9ad40b7079fd8e36cd3d127b3aed9fff7e3f293f1fe1913b4d850ba0814d"
+          "1ce1acc6b9d6fc82713cac49356fd693d9aec070ea20a8b671ace6416477962f"
         )
         .getType()
         .name()
@@ -110,13 +110,13 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       //  TODO: Criar uma função para isso.
       Gson gson = new Gson();
-      Type listType = new TypeToken<ArrayList<ApiMessage>>() {}.getType();
-      ArrayList<ApiMessage> myObjects = gson.fromJson(response, listType);
+      Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
+      ArrayList<Payload> myObjects = gson.fromJson(response, listType);
 
-      for (ApiMessage myObject : myObjects) { // TODO: Refatorar esse laço
+      for (Payload myObject : myObjects) { // TODO: Refatorar esse laço
         transactions.add(
           Transaction.getTransactionObjectByType(
-            myObject.getContent(),
+            myObject.getData(),
             debugModeValue
           )
         );
@@ -171,10 +171,10 @@ public class LedgerReader implements ILedgerReader, Runnable {
       conn.disconnect();
 
       //  TODO: Criar uma função para isso.
-      ApiMessage message = gson.fromJson(response, ApiMessage.class);
+      Payload message = gson.fromJson(response, Payload.class);
 
       return Transaction.getTransactionObjectByType(
-        message.getContent(),
+        message.getData(),
         debugModeValue
       );
     } catch (MalformedURLException mue) {
