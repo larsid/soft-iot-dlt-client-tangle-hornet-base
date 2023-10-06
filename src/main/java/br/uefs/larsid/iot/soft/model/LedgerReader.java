@@ -7,11 +7,9 @@ import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerReader;
 import br.uefs.larsid.iot.soft.services.ILedgerSubscriber;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -108,19 +106,8 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       conn.disconnect();
 
-      //  TODO: Criar uma função para isso.
-      Gson gson = new Gson();
-      Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
-      ArrayList<Payload> myObjects = gson.fromJson(response, listType);
-
-      for (Payload myObject : myObjects) { // TODO: Refatorar esse laço
-        transactions.add(
-          Transaction.getTransactionObjectByType(
-            myObject.getData(),
-            debugModeValue
-          )
-        );
-      }
+      transactions =
+        Transaction.jsonArrayInStringToTransaction(response, debugModeValue);
 
       return transactions;
     } catch (MalformedURLException mue) {
@@ -146,7 +133,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
     String response = null;
 
     try {
-      Gson gson = new Gson();
+      // Gson gson = new Gson();
       URL url = new URL(
         String.format("%s/%s/%s/", this.urlApi, ENDPOINT_MESSAGE_ID, messageId)
       );
@@ -170,11 +157,8 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
       conn.disconnect();
 
-      //  TODO: Criar uma função para isso.
-      Payload message = gson.fromJson(response, Payload.class);
-
       return Transaction.getTransactionObjectByType(
-        message.getData(),
+        Payload.stringToPayload(response).getData(),
         debugModeValue
       );
     } catch (MalformedURLException mue) {

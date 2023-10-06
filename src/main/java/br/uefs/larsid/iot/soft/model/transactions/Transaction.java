@@ -1,11 +1,16 @@
 package br.uefs.larsid.iot.soft.model.transactions;
 
 import br.uefs.larsid.iot.soft.enums.TransactionType;
+import br.uefs.larsid.iot.soft.model.tangle.hornet.Payload;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import java.io.StringReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -75,6 +80,51 @@ public class Transaction {
     } else {
       return gson.fromJson(reader, LBDevice.class);
     }
+  }
+
+  /**
+   * Converts a JSON string into a Transaction object.
+   *
+   * @param string String - JSON in string.
+   * @param debugModeValue boolean - Toggle log messages.
+   * @return Transaction
+   */
+  public static Transaction jsonInStringToTransaction(
+    String jsonInString,
+    boolean debugModeValue
+  ) {
+    return Transaction.getTransactionObjectByType(
+      Payload.stringToPayload(jsonInString).getData(),
+      debugModeValue
+    );
+  }
+
+  /**
+   * Converts a JSON array string into a List of transactions objects.
+   *
+   * @param jsonArrayInString String - JSON array in string.
+   * @param debugModeValue boolean - Toggle log messages.
+   * @return List<Transaction>
+   */
+  public static List<Transaction> jsonArrayInStringToTransaction(
+    String jsonArrayInString,
+    boolean debugModeValue
+  ) {
+    Gson gson = new Gson();
+    Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
+    ArrayList<Payload> myObjects = gson.fromJson(jsonArrayInString, listType);
+    List<Transaction> transactions = new ArrayList<Transaction>();
+
+    for (Payload myObject : myObjects) { // TODO: Refatorar esse laço
+      transactions.add(
+        Transaction.getTransactionObjectByType(
+          myObject.getData(),
+          debugModeValue
+        )
+      );
+    }
+
+    return transactions;
   }
 
   public final String getSource() {
