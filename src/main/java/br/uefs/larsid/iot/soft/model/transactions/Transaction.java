@@ -112,17 +112,21 @@ public class Transaction {
   ) {
     Gson gson = new Gson();
     Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
-    ArrayList<Payload> myObjects = gson.fromJson(jsonArrayInString, listType);
+    ArrayList<Payload> payloadList = gson.fromJson(jsonArrayInString, listType);
     List<Transaction> transactions = new ArrayList<Transaction>();
 
-    for (Payload myObject : myObjects) { // TODO: Refatorar esse laço
-      transactions.add(
-        Transaction.getTransactionObjectByType(
-          myObject.getData(),
-          debugModeValue
-        )
-      );
-    }
+    payloadList.forEach(
+      (
+        payload -> {
+          transactions.add(
+            Transaction.getTransactionObjectByType(
+              payload.getData(),
+              debugModeValue
+            )
+          );
+        }
+      )
+    );
 
     return transactions;
   }
