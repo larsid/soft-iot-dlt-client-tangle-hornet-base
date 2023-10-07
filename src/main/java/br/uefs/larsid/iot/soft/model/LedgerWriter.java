@@ -1,7 +1,5 @@
 package br.uefs.larsid.iot.soft.model;
 
-import br.uefs.larsid.iot.soft.enums.TransactionType;
-import br.uefs.larsid.iot.soft.model.transactions.Evaluation;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerWriter;
 import com.google.gson.Gson;
@@ -38,28 +36,12 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
   }
 
   public void start() {
-    logger.info("Starting LedgerWriter");
-
     if (this.DLTOutboundMonitor == null) {
       this.DLTOutboundMonitor = new Thread(this);
       this.DLTOutboundMonitor.setName(
           "CLIENT_TANGLE_HORNET/DLT_OUTBOUND_MONITOR"
         );
       this.DLTOutboundMonitor.start();
-    }
-
-    Transaction transaction1 = new Evaluation(
-      "source_teste",
-      "target_teste",
-      TransactionType.REP_EVALUATION,
-      1
-    );
-    try {
-      this.put(transaction1);
-    } catch (InterruptedException ie) {
-      if (debugModeValue) {
-        logger.severe(ie.getMessage());
-      }
     }
   }
 
