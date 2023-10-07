@@ -2,7 +2,6 @@ package br.uefs.larsid.iot.soft.model;
 
 import br.uefs.larsid.iot.soft.model.tangle.hornet.Message;
 import br.uefs.larsid.iot.soft.model.tangle.hornet.Payload;
-import br.uefs.larsid.iot.soft.model.transactions.Status;
 import br.uefs.larsid.iot.soft.model.transactions.Transaction;
 import br.uefs.larsid.iot.soft.services.ILedgerReader;
 import br.uefs.larsid.iot.soft.services.ILedgerSubscriber;
@@ -47,19 +46,6 @@ public class LedgerReader implements ILedgerReader, Runnable {
   }
 
   public void start() {
-    // TODO: Temporário, remover depois
-    logger.info(
-      "AVAILABLE: " +
-      ((Status) this.getTransactionsByIndex("LB_STATUS").get(0)).getAvailable()
-    );
-    logger.info(
-      this.getTransactionById(
-          "1ce1acc6b9d6fc82713cac49356fd693d9aec070ea20a8b671ace6416477962f"
-        )
-        .getType()
-        .name()
-    );
-
     if (this.DLTInboundMonitor == null) {
       this.DLTInboundMonitor = new Thread(this);
       this.DLTInboundMonitor.setName("CLIENT_TANGLE/DLT_INBOUND_MONITOR");

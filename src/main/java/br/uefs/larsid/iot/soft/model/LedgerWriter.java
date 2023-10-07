@@ -36,8 +36,6 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
   }
 
   public void start() {
-    logger.info("Starting LedgerWriter");
-
     if (this.DLTOutboundMonitor == null) {
       this.DLTOutboundMonitor = new Thread(this);
       this.DLTOutboundMonitor.setName(
