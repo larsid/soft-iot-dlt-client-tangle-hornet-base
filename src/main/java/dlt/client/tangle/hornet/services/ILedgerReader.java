@@ -1,8 +1,8 @@
-package br.uefs.larsid.iot.soft.services;
+package dlt.client.tangle.hornet.services;
 
 import java.util.List;
 
-import br.uefs.larsid.iot.soft.model.transactions.Transaction;
+import dlt.client.tangle.hornet.model.transactions.Transaction;
 
 /**
  * @author Allan Capistrano, Uellington Damasceno

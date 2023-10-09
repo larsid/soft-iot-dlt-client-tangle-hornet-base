@@ -1,4 +1,4 @@
-package br.uefs.larsid.iot.soft.model.tangle.hornet;
+package dlt.client.tangle.hornet.model.tangle;
 
 import com.google.gson.Gson;
 

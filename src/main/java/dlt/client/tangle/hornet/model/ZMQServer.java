@@ -1,4 +1,4 @@
-package br.uefs.larsid.iot.soft.model;
+package dlt.client.tangle.hornet.model;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

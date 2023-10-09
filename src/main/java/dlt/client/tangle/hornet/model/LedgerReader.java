@@ -1,10 +1,11 @@
-package br.uefs.larsid.iot.soft.model;
+package dlt.client.tangle.hornet.model;
 
-import br.uefs.larsid.iot.soft.model.tangle.hornet.Message;
-import br.uefs.larsid.iot.soft.model.tangle.hornet.Payload;
-import br.uefs.larsid.iot.soft.model.transactions.Transaction;
-import br.uefs.larsid.iot.soft.services.ILedgerReader;
-import br.uefs.larsid.iot.soft.services.ILedgerSubscriber;
+import dlt.client.tangle.hornet.model.tangle.Message;
+import dlt.client.tangle.hornet.model.tangle.Payload;
+import dlt.client.tangle.hornet.model.transactions.Transaction;
+import dlt.client.tangle.hornet.services.ILedgerReader;
+import dlt.client.tangle.hornet.services.ILedgerSubscriber;
+
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;

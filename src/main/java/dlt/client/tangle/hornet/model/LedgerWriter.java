@@ -1,7 +1,8 @@
-package br.uefs.larsid.iot.soft.model;
+package dlt.client.tangle.hornet.model;
 
-import br.uefs.larsid.iot.soft.model.transactions.Transaction;
-import br.uefs.larsid.iot.soft.services.ILedgerWriter;
+import dlt.client.tangle.hornet.model.transactions.Transaction;
+import dlt.client.tangle.hornet.services.ILedgerWriter;
+
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

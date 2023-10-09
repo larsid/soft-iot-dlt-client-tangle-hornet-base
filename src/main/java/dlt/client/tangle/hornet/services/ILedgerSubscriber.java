@@ -1,4 +1,4 @@
-package br.uefs.larsid.iot.soft.services;
+package dlt.client.tangle.hornet.services;
 
 /**
  *

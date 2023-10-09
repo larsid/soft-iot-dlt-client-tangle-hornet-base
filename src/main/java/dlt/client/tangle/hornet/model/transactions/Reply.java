@@ -1,6 +1,6 @@
-package br.uefs.larsid.iot.soft.model.transactions;
+package dlt.client.tangle.hornet.model.transactions;
 
-import br.uefs.larsid.iot.soft.enums.TransactionType;
+import dlt.client.tangle.hornet.enums.TransactionType;
 
 /**
  *

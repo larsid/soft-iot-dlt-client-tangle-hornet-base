@@ -1,7 +1,8 @@
-package br.uefs.larsid.iot.soft.model.transactions;
+package dlt.client.tangle.hornet.model.transactions;
 
-import br.uefs.larsid.iot.soft.enums.TransactionType;
-import br.uefs.larsid.iot.soft.model.tangle.hornet.Payload;
+import dlt.client.tangle.hornet.enums.TransactionType;
+import dlt.client.tangle.hornet.model.tangle.Payload;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

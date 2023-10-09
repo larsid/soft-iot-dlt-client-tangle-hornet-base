@@ -1,4 +1,4 @@
-package br.uefs.larsid.iot.soft.enums;
+package dlt.client.tangle.hornet.enums;
 
 /**
  *
