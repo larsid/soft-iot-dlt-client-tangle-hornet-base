@@ -7,13 +7,13 @@
 
 
     <service id="ILedgerReaderService" ref="ledgerReader"
-        interface="br.uefs.larsid.iot.soft.services.ILedgerReader" />
+        interface="dlt.client.tangle.hornet.services.ILedgerReader" />
     <service id="ILedgerWriterService" ref="ledgerWriter"
-        interface="br.uefs.larsid.iot.soft.services.ILedgerWriter" />
+        interface="dlt.client.tangle.hornet.services.ILedgerWriter" />
 
     <bean
         id="ZMQServer"
-        class="br.uefs.larsid.iot.soft.model.ZMQServer"
+        class=" dlt.client.tangle.hornet.model.ZMQServer"
         init-method="start"
         destroy-method="stop">
         <argument value="${BUFFER_MAX_LEN}" />
@@ -24,7 +24,7 @@
 
     <bean
         id="ledgerReader"
-        class="br.uefs.larsid.iot.soft.model.LedgerReader"
+        class=" dlt.client.tangle.hornet.model.LedgerReader"
         init-method="start"
         destroy-method="stop"
     >
@@ -37,7 +37,7 @@
 
     <bean
         id="ledgerWriter"
-        class="br.uefs.larsid.iot.soft.model.LedgerWriter"
+        class=" dlt.client.tangle.hornet.model.LedgerWriter"
         init-method="start"
         destroy-method="stop"
     >
