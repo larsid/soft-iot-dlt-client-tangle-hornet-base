@@ -73,7 +73,13 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     this.DLTOutboundBuffer.put(transaction);
   }
 
-  public void createMessage(String index, String content) {
+  /**
+   * Create a new message in Tangle Hornet.
+   * 
+   * @param index String - Index of the message.
+   * @param data String - Data of the message.
+   */
+  public void createMessage(String index, String data) {
     try {
       URL url = new URL(String.format("%s/%s", this.urlApi, ENDPOINT));
 
@@ -85,9 +91,9 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
       connection.setDoOutput(true); // Permitir a escrita no corpo da requisição
 
       String requestBody = String.format(
-        "{\"index\": \"%s\",\"content\": %s}",
+        "{\"index\": \"%s\",\"data\": %s}",
         index,
-        content
+        data
       );
 
       // Escrever o corpo da requisição no OutputStream
