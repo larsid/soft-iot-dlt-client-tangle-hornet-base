@@ -1,9 +1,8 @@
 package dlt.client.tangle.hornet.model;
 
-import dlt.client.tangle.hornet.model.transactions.Transaction;
-import dlt.client.tangle.hornet.services.ILedgerWriter;
-
 import com.google.gson.Gson;
+import dlt.client.tangle.hornet.model.transactions.IndexTransaction;
+import dlt.client.tangle.hornet.services.ILedgerWriter;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,7 +15,7 @@ import java.util.logging.Logger;
 
 /**
  * @author Allan Capistrano
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class LedgerWriter implements ILedgerWriter, Runnable {
 
@@ -24,7 +23,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
   private String urlApi;
   private Thread DLTOutboundMonitor;
-  private final BlockingQueue<Transaction> DLTOutboundBuffer;
+  private final BlockingQueue<IndexTransaction> DLTOutboundBuffer;
   private static final Logger logger = Logger.getLogger(
     LedgerWriter.class.getName()
   );
@@ -33,7 +32,8 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
   public LedgerWriter(String protocol, String url, int port, int bufferSize) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
-    this.DLTOutboundBuffer = new ArrayBlockingQueue<Transaction>(bufferSize);
+    this.DLTOutboundBuffer =
+      new ArrayBlockingQueue<IndexTransaction>(bufferSize);
   }
 
   public void start() {
@@ -56,26 +56,35 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
     while (!this.DLTOutboundMonitor.isInterrupted()) {
       try {
-        Transaction transaction = this.DLTOutboundBuffer.take();
-        transaction.setPublishedAt(System.currentTimeMillis());
+        IndexTransaction indexTransaction = this.DLTOutboundBuffer.take();
 
-        String transactionJson = gson.toJson(transaction);
+        indexTransaction
+          .getTransaction()
+          .setPublishedAt(System.currentTimeMillis());
 
-        this.createMessage(transaction.getType().name(), transactionJson);
+        String transactionJson = gson.toJson(indexTransaction.getTransaction());
+
+        this.createMessage(indexTransaction.getIndex(), transactionJson);
       } catch (InterruptedException ex) {
         this.DLTOutboundMonitor.interrupt();
       }
     }
   }
 
+  /**
+   * Put a transaction to be published on Tangle Hornet
+   *
+   * @param indexTransaction IndexTransaction - Transação que será publicada.
+   */
   @Override
-  public void put(Transaction transaction) throws InterruptedException {
-    this.DLTOutboundBuffer.put(transaction);
+  public void put(IndexTransaction indexTransaction)
+    throws InterruptedException {
+    this.DLTOutboundBuffer.put(indexTransaction);
   }
 
   /**
    * Create a new message in Tangle Hornet.
-   * 
+   *
    * @param index String - Index of the message.
    * @param data String - Data of the message.
    */
