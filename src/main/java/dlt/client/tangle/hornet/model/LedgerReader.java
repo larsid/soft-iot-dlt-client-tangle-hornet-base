@@ -202,7 +202,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
         if (receivedMessage != null && receivedMessage.contains("/")) {
           Gson gson = new Gson();
-          String[] data = receivedMessage.split("/");
+          String[] data = receivedMessage.split("/", 2);
           String topic = data[0];
 
           Message message = gson.fromJson(data[1], Message.class);
