@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -21,149 +22,158 @@ import java.util.logging.Logger;
  */
 public class Transaction {
 
-  private final String source;
-  private final String group;
-  private final TransactionType type;
+    private final String source;
+    private final String group;
+    private final TransactionType type;
 
-  private long createdAt;
-  private long publishedAt;
-  private static final Logger logger = Logger.getLogger(
-    Transaction.class.getName()
-  );
-
-  public Transaction(String source, String group, TransactionType type) {
-    this.source = source;
-    this.type = type;
-    this.group = group;
-    this.createdAt = System.currentTimeMillis();
-  }
-
-  /**
-   * Get a transaction object by the field 'type' in the JSON.
-   *
-   * @param transactionJSON String - JSON in string.
-   * @param debugModeValue boolean - Toggle log messages.
-   * @return Transaction
-   */
-  public static Transaction getTransactionObjectByType(
-    String transactionJSON,
-    boolean debugModeValue
-  ) {
-    if (debugModeValue) {
-      logger.info("JSON Message");
-      logger.info(transactionJSON);
-    }
-
-    JsonReader reader = new JsonReader(new StringReader(transactionJSON));
-
-    reader.setLenient(true);
-
-    JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-
-    String type = jsonObject.get("type").getAsString();
-    Gson gson = new Gson();
-
-    reader = new JsonReader(new StringReader(transactionJSON));
-    reader.setLenient(true);
-
-    if (type.equals(TransactionType.LB_ENTRY.name())) {
-      return gson.fromJson(reader, Status.class);
-    } else if (type.equals(TransactionType.LB_ENTRY_REPLY.name())) {
-      return gson.fromJson(reader, LBReply.class);
-    } else if (type.equals(TransactionType.LB_REPLY.name())) {
-      return gson.fromJson(reader, Reply.class);
-    } else if (type.equals(TransactionType.LB_REQUEST.name())) {
-      return gson.fromJson(reader, Request.class);
-    } else if (type.equals(TransactionType.LB_STATUS.name())) {
-      return gson.fromJson(reader, Status.class);
-    } else if (type.equals(TransactionType.REP_EVALUATION.name())) {
-      return gson.fromJson(reader, Evaluation.class);
-    } else {
-      return gson.fromJson(reader, LBDevice.class);
-    }
-  }
-
-  /**
-   * Converts a JSON string into a Transaction object.
-   *
-   * @param string String - JSON in string.
-   * @param debugModeValue boolean - Toggle log messages.
-   * @return Transaction
-   */
-  public static Transaction jsonInStringToTransaction(
-    String jsonInString,
-    boolean debugModeValue
-  ) {
-    return Transaction.getTransactionObjectByType(
-      Payload.stringToPayload(jsonInString).getData(),
-      debugModeValue
+    private final long createdAt;
+    private long publishedAt;
+    
+    private static final Logger logger = Logger.getLogger(
+            Transaction.class.getName()
     );
-  }
 
-  /**
-   * Converts a JSON array string into a List of transactions objects.
-   *
-   * @param jsonArrayInString String - JSON array in string.
-   * @param debugModeValue boolean - Toggle log messages.
-   * @return List<Transaction>
-   */
-  public static List<Transaction> jsonArrayInStringToTransaction(
-    String jsonArrayInString,
-    boolean debugModeValue
-  ) {
-    Gson gson = new Gson();
-    Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
-    ArrayList<Payload> payloadList = gson.fromJson(jsonArrayInString, listType);
-    List<Transaction> transactions = new ArrayList<Transaction>();
+    public Transaction(String source, String group, TransactionType type) {
+        this.source = source;
+        this.type = type;
+        this.group = group;
+        this.createdAt = System.currentTimeMillis();
+    }
 
-    payloadList.forEach(
-      (
-        payload -> {
-          transactions.add(
-            Transaction.getTransactionObjectByType(
-              payload.getData(),
-              debugModeValue
-            )
-          );
+    /**
+     * Get a transaction object by the field 'type' in the JSON.
+     *
+     * @param transactionJSON String - JSON in string.
+     * @param debugModeValue boolean - Toggle log messages.
+     * @return Transaction
+     */
+    public static Transaction getTransactionObjectByType(
+            String transactionJSON,
+            boolean debugModeValue
+    ) {
+        if (debugModeValue) {
+            logger.info("JSON Message");
+            logger.info(transactionJSON);
         }
-      )
-    );
 
-    return transactions;
-  }
+        JsonReader reader = new JsonReader(new StringReader(transactionJSON));
 
-  public final String getSource() {
-    return this.source;
-  }
+        reader.setLenient(true);
 
-  public final String getGroup() {
-    return this.group;
-  }
+        JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
 
-  public final TransactionType getType() {
-    return this.type;
-  }
+        String type = jsonObject.get("type").getAsString();
+        Gson gson = new Gson();
 
-  public final long getCreatedAt() {
-    return this.createdAt;
-  }
+        reader = new JsonReader(new StringReader(transactionJSON));
+        reader.setLenient(true);
 
-  public final void setPublishedAt(long publishedAt) {
-    this.publishedAt = publishedAt;
-  }
+        if (type.equals(TransactionType.LB_ENTRY.name())) {
+            return gson.fromJson(reader, Status.class);
+        } else if (type.equals(TransactionType.LB_ENTRY_REPLY.name())) {
+            return gson.fromJson(reader, LBReply.class);
+        } else if (type.equals(TransactionType.LB_REPLY.name())) {
+            return gson.fromJson(reader, Reply.class);
+        } else if (type.equals(TransactionType.LB_REQUEST.name())) {
+            return gson.fromJson(reader, Request.class);
+        } else if (type.equals(TransactionType.LB_STATUS.name())) {
+            return gson.fromJson(reader, Status.class);
+        } else if (type.equals(TransactionType.LB_MULTI_DEVICE_REQUEST.name())) {
+            return gson.fromJson(reader, LBMultiDevice.class);
+        } else if (type.equals(TransactionType.LB_MULTI_DEVICE_RESPONSE.name())) {
+            return gson.fromJson(reader, LBMultiDeviceResponse.class);
+        } else if (type.equals(TransactionType.LB_MULTI_REQUEST.name())) {
+            return gson.fromJson(reader, LBMultiRequest.class);
+        } else if (type.equals(TransactionType.LB_MULTI_RESPONSE.name())) {
+            return gson.fromJson(reader, LBMultiResponse.class);
+        } else {
+            return gson.fromJson(reader, LBDevice.class);
+        }
+    }
 
-  public final long getPublishedAt() {
-    return this.publishedAt;
-  }
+    /**
+     * Converts a JSON string into a Transaction object.
+     *
+     * @param string String - JSON in string.
+     * @param debugModeValue boolean - Toggle log messages.
+     * @return Transaction
+     */
+    public static Transaction jsonInStringToTransaction(
+            String jsonInString,
+            boolean debugModeValue
+    ) {
+        return Transaction.getTransactionObjectByType(
+                Payload.stringToPayload(jsonInString).getData(),
+                debugModeValue
+        );
+    }
 
-  @Override
-  public String toString() {
-    return new StringBuilder("Transaction: ")
-      .append(this.source)
-      .append(this.group)
-      .append(this.type)
-      .append(this.createdAt)
-      .append(this.publishedAt)
-      .toString();
-  }
+    /**
+     * Converts a JSON array string into a List of transactions objects.
+     *
+     * @param jsonArrayInString String - JSON array in string.
+     * @param debugModeValue boolean - Toggle log messages.
+     * @return List<Transaction>
+     */
+    public static List<Transaction> jsonArrayInStringToTransaction(
+            String jsonArrayInString,
+            boolean debugModeValue) {
+        
+        Gson gson = new Gson();
+        Type listType = new TypeToken<ArrayList<Payload>>() {}.getType();
+        
+        ArrayList<Payload> payloadList = gson.fromJson(jsonArrayInString, listType);
+
+        return payloadList.stream()
+                .map((payload) -> Transaction.getTransactionObjectByType(
+                payload.getData(),
+                debugModeValue)).collect(toList());
+    }
+
+    public final String getSource() {
+        return this.source;
+    }
+
+    public final String getGroup() {
+        return this.group;
+    }
+
+    public final TransactionType getType() {
+        return this.type;
+    }
+
+    public final long getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public final void setPublishedAt(long publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public final long getPublishedAt() {
+        return this.publishedAt;
+    }
+
+    public boolean is(TransactionType type) {
+        return this.type == type;
+    }
+
+    public boolean isLoopback(String source) {
+        return this.source.equals(source);
+    }
+
+    public boolean isMultiLayerTransaction() {
+        return this.type.isMultiLayer();
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("Transaction: ")
+                .append(this.source)
+                .append(this.group)
+                .append(this.type)
+                .append(this.createdAt)
+                .append(this.publishedAt)
+                .toString();
+    }
 }

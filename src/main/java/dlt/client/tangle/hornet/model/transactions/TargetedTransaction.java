@@ -23,4 +23,8 @@ public abstract class TargetedTransaction extends Transaction {
   public final String getTarget() {
     return this.target;
   }
+  
+  public boolean isSameTarget(String target){
+      return this.target.equals(target);
+  }
 }
