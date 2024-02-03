@@ -6,7 +6,7 @@ import dlt.client.tangle.hornet.enums.TransactionType;
  *
  * @author Uellington Damasceno
  */
-class LBMultiDeviceResponse extends TargetedTransaction {
+public class LBMultiDeviceResponse extends TargetedTransaction {
 
     private final String device;
 
