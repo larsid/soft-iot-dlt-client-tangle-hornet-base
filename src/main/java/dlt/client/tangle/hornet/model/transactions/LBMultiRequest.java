@@ -6,16 +6,10 @@ import dlt.client.tangle.hornet.enums.TransactionType;
  *
  * @author uellington
  */
-public class LBMultiRequest extends TargetedTransaction{
-    
-  private final String device;
-
-  public LBMultiRequest(String source, String group, String device, String target) {
-    super(source, group, TransactionType.LB_MULTI_REQUEST, target);
-    this.device = device;
+public class LBMultiRequest extends Transaction{
+ 
+  public LBMultiRequest(String source, String group) {
+    super(source, group, TransactionType.LB_MULTI_REQUEST);
   }
-
-  public String getDevice() {
-    return this.device;
-  }
+  
 }
