@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -132,11 +133,11 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         in.close();
 
         if (debugModeValue) {
-          logger.info("API response: " + response.toString());
+          logger.log(Level.INFO, "API response: {0}", response.toString());
         }
       } else {
         if (debugModeValue) {
-          logger.info("Error in HTTP request: " + responseCode);
+          logger.log(Level.INFO, "Error in HTTP request: {0}", responseCode);
         }
       }
 

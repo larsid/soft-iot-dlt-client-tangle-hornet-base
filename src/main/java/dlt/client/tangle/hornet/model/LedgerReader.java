@@ -43,7 +43,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
   public LedgerReader(String protocol, String url, int port) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
-    this.topics = new HashMap<String, Set<ILedgerSubscriber>>();
+    this.topics = new HashMap<>();
   }
 
   public void start() {
@@ -67,7 +67,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
   @Override
   public List<Transaction> getTransactionsByIndex(String index) {
     String response = null;
-    List<Transaction> transactions = new ArrayList<Transaction>();
+    List<Transaction> transactions = new ArrayList<>();
 
     try {
       URL url = new URL(

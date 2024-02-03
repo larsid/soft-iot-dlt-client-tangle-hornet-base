@@ -1,9 +1,14 @@
 package dlt.client.tangle.hornet.model.transactions;
 
+import dlt.client.tangle.hornet.enums.TransactionType;
+
 /**
  *
  * @author Uellington Damasceno
  */
-public class LBMultiResponse {
-    
+public class LBMultiResponse extends TargetedTransaction {
+
+  public LBMultiResponse(String source, String group, String target) {
+    super(source, group, TransactionType.LB_MULTI_DEVICE_RESPONSE, target);
+  }
 }
