@@ -2,6 +2,7 @@ package dlt.client.tangle.hornet.model;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
@@ -35,7 +36,7 @@ public class ZMQServer implements Runnable {
 
   public void start() {
     if (this.serverThread == null) {
-      logger.info("Socket URL: " + this.socketURL);
+      logger.log(Level.INFO, "Socket URL: {0}", this.socketURL);
 
       this.serverListener.connect(this.socketURL);
       this.serverThread = new Thread(this);
@@ -50,7 +51,7 @@ public class ZMQServer implements Runnable {
   }
 
   public void subscribe(String topic) {
-    logger.info("Subscribe: " + topic);
+    logger.log(Level.INFO, "Subscribe: {0}", topic);
     this.serverListener.subscribe(topic);
   }
 

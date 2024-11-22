@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -52,6 +53,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
       this.DLTInboundMonitor.setName("CLIENT_TANGLE/DLT_INBOUND_MONITOR");
       this.DLTInboundMonitor.start();
     }
+    logger.log(Level.INFO, "LEDGER READER - Complete URL: {0}", this.urlApi);
   }
 
   public void stop() {

@@ -45,6 +45,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         );
       this.DLTOutboundMonitor.start();
     }
+    logger.log(Level.INFO, "LEDGER WRITER - Complete URL: {0}", this.urlApi);
   }
 
   public void stop() {
