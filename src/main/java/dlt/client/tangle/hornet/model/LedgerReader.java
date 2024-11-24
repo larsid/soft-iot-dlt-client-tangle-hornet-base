@@ -39,8 +39,8 @@ public class LedgerReader implements ILedgerReader, Runnable {
     LedgerReader.class.getName()
   );
 
-  private static final String ENDPOINT = "message";
-  private static final String ENDPOINT_MESSAGE_ID = "message/messageId";
+  private static final String ENDPOINT = "/api/v1/messages";
+  private static final String ENDPOINT_MESSAGE_ID = "/api/v1/messages";
 
   public LedgerReader(String protocol, String url, int port) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
