@@ -29,7 +29,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     LedgerWriter.class.getName()
   );
 
-  private static final String ENDPOINT = "/api/v1/messages";
+  private static final String ENDPOINT = "api/v1/messages";
 
   public LedgerWriter(String protocol, String url, int port, int bufferSize) {
     this.urlApi = String.format("%s://%s:%s", protocol, url, port);
