@@ -123,7 +123,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
             connection.setDoOutput(true);
 
             String requestBody = String.format(
-                    "{\"index\": \"%s\",\"data\": %s}",
+                    "{\"index\": \"%s\",\"payload\": %s}",
                     index,
                     data
             );
