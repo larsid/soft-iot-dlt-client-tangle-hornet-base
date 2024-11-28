@@ -117,18 +117,21 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         try {
             URL url = new URL(String.format("%s/%s", this.urlApi, ENDPOINT));
 
-            // Abrir conexão HTTP
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true); // Permitir a escrita no corpo da requisição
+            connection.setDoOutput(true);
 
             String requestBody = String.format(
                     "{\"index\": \"%s\",\"data\": %s}",
                     index,
                     data
             );
-
+            
+            if (debugModeValue) {
+                logger.log(Level.INFO, "Published message: {0}", requestBody);
+            }
+            
             try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
                 outputStream.writeBytes(requestBody);
                 outputStream.flush();
@@ -149,7 +152,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
             if (responseCode >= HTTP_OK && responseCode <= HTTP_PARTIAL) {
                 if (debugModeValue) {
-                    logger.log(Level.INFO, "Successful API response: {0} - {1}",  new Object[]{responseCode, response});
+                    logger.log(Level.INFO, "Successful API response: {0} - {1}", new Object[]{responseCode, response});
                 }
             } else if (responseCode >= HTTP_MULT_CHOICE && responseCode <= HTTP_USE_PROXY) {
                 if (debugModeValue) {
