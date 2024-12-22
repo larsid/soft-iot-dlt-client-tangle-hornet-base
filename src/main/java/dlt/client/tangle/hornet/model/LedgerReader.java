@@ -226,12 +226,30 @@ public class LedgerReader implements ILedgerReader, Runnable {
   }
 
   private void notifyAll(String topic, Object object, Object object2) {
-    if (topic != null && !topic.isEmpty()) {
-      Set<ILedgerSubscriber> subscribers = this.topics.get(topic);
-      if (subscribers != null && !subscribers.isEmpty()) {
-        subscribers.forEach(sub -> sub.update(object, object2));
+      if (topic == null || topic.isEmpty()) {
+          return;
       }
-    }
+      Set<ILedgerSubscriber> subscribers = this.getSubscribers(topic);
+      if (subscribers == null || subscribers.isEmpty()) {
+          return;
+      }
+      subscribers.forEach(sub -> sub.update(object, object2));
+  }
+
+  private Set<ILedgerSubscriber> getSubscribers(String topic) {
+      Set<ILedgerSubscriber> subscribers = new HashSet<>();
+
+      if (topics.containsKey(topic)) {
+          subscribers.addAll(topics.get(topic));
+      }
+
+      for (Map.Entry<String, Set<ILedgerSubscriber>> entry : topics.entrySet()) {
+          String registeredTopic = entry.getKey();
+          if (registeredTopic.matches(topic.replace("*", ".*"))) {
+              subscribers.addAll(entry.getValue());
+          }
+      }
+      return subscribers;
   }
 
   public String getUrlApi() {
