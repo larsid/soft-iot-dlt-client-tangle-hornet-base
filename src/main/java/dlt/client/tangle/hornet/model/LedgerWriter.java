@@ -89,7 +89,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
                 String transactionJson = gson.toJson(indexTransaction.getTransaction());
 
-                this.createMessage(indexTransaction.getIndex(), transactionJson);
+                this.publishMessage(indexTransaction.getIndex(), transactionJson);
             } catch (InterruptedException ex) {
                 this.DLTOutboundMonitor.interrupt();
             }
@@ -113,7 +113,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
      * @param index String - Index of the message.
      * @param data String - Data of the message.
      */
-    public void createMessage(String index, String data) {
+    public void publishMessage(String index, String data) {
         try {
             URL url = new URL(String.format("%s/%s", this.urlApi, ENDPOINT));
 
@@ -122,11 +122,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
 
-            String requestBody = String.format(
-                    "{\"index\": \"%s\",\"data\": %s}",
-                    index,
-                    data
-            );
+            String requestBody = this.createPublishRequestBody(index, data);
             
             if (debugModeValue) {
                 logger.log(Level.INFO, "Published message: {0}", requestBody);
@@ -144,6 +140,24 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Exception occurred while sending HTTP request: {0}", e.getMessage());
         }
+    }
+    
+    private String createPublishRequestBody(String index, String data)
+    {
+        String indexInHex = this.stringToHex(index);
+        String dataInHex = this.stringToHex(data);     
+        return String.format(
+                    "{\"payload\":{\"index\": \"%s\",\"data\": \"%s\",\"type\":2}}",
+                    indexInHex,
+                    dataInHex
+            );
+    }
+    
+    private String stringToHex(String string)
+    {
+        return string.chars()
+                .mapToObj(Integer::toHexString)
+                .collect(Collectors.joining());
     }
 
     private void handleResponse(InputStream stream, int responseCode) {
