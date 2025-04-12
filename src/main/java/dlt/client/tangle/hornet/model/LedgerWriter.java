@@ -124,10 +124,6 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
             String requestBody = this.createPublishRequestBody(index, data);
             
-            if (debugModeValue) {
-                logger.log(Level.INFO, "Published message: {0}", requestBody);
-            }
-            
             try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
                 outputStream.writeBytes(requestBody);
                 outputStream.flush();
@@ -135,7 +131,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
             int responseCode = connection.getResponseCode();
 
-            handleResponse(connection.getInputStream(), responseCode);
+            handleResponse(connection.getInputStream(), data, responseCode);
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Exception occurred while sending HTTP request: {0}", e.getMessage());
@@ -160,13 +156,14 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
                 .collect(Collectors.joining());
     }
 
-    private void handleResponse(InputStream stream, int responseCode) {
+    private void handleResponse(InputStream stream, String message, int responseCode) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
             String response = reader.lines().collect(Collectors.joining("\n"));
+            
 
             if (responseCode >= HTTP_OK && responseCode <= HTTP_PARTIAL) {
                 if (debugModeValue) {
-                    logger.log(Level.INFO, "Successful API response: {0} - {1}", new Object[]{responseCode, response});
+                    logger.log(Level.INFO, "{0} | {1} | {2}", new Object[]{responseCode, message, response});
                 }
             } else if (responseCode >= HTTP_MULT_CHOICE && responseCode <= HTTP_USE_PROXY) {
                 if (debugModeValue) {

@@ -51,12 +51,14 @@ public class LedgerReader implements ILedgerReader, Runnable {
     if (this.DLTInboundMonitor == null) {
       this.DLTInboundMonitor = new Thread(this);
       this.DLTInboundMonitor.setName("CLIENT_TANGLE/DLT_INBOUND_MONITOR");
+      this.server.start();
       this.DLTInboundMonitor.start();
     }
     logger.log(Level.INFO, "LEDGER READER - Complete URL: {0}", this.urlApi);
   }
 
   public void stop() {
+    logger.info("LEDGER READER IS STOPPING.");
     this.server.stop();
     this.DLTInboundMonitor.interrupt();
   }

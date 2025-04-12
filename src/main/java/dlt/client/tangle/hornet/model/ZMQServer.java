@@ -45,6 +45,7 @@ public class ZMQServer implements Runnable {
     }
 
     public void stop() {
+        logger.info("CLIENT_TANGLE/ZMQ_SERVER - ZMQ SERVER IS STOPPING.");
         this.serverThread.interrupt();
         this.serverListener.close();
     }
@@ -64,13 +65,16 @@ public class ZMQServer implements Runnable {
 
     @Override
     public void run() {
+        logger.info("Estabelecendo conexão com o servidor ZMQ");
         this.connectWithRetry(100, 5*1000);
         while (!this.serverThread.isInterrupted()) {
+            logger.info("CLIENT_TANGLE/ZMQ_SERVER - WAITING MESSAGE");
             byte[] reply = serverListener.recv(0);
             String[] data = (new String(reply).split(" "));
 
             this.putReceivedMessageBuffer(String.format("%s/%s", data[0], data[1]));
         }
+        logger.info("CLIENT_TANGLE/ZMQ_SERVER - STOPED");
     }
 
     private void putReceivedMessageBuffer(String receivedMessage) {
@@ -87,6 +91,8 @@ public class ZMQServer implements Runnable {
 
         while (attempts < maxRetries && !connected) {
             try {
+                logger.log(Level.INFO, "Tentando conectar ao Servidor ZMQ: {0}", socketURL);
+                
                 this.serverListener.connect(socketURL);
                 logger.log(Level.INFO, "Conectado ao servidor ZMQ: {0}", socketURL);
                 connected = true;
