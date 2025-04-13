@@ -18,6 +18,9 @@ public class ZMQServer implements Runnable {
     private final BlockingQueue<String> DLTInboundBuffer;
     private ZMQ.Socket serverListener;
     private String socketURL;
+
+    private volatile boolean isConnected = false;
+
     private static final Logger logger = Logger.getLogger(
             ZMQServer.class.getName()
     );
@@ -28,7 +31,7 @@ public class ZMQServer implements Runnable {
             String socketURL,
             String socketPort
     ) {
-        this.DLTInboundBuffer = new ArrayBlockingQueue<String>(bufferSize);
+        this.DLTInboundBuffer = new ArrayBlockingQueue<>(bufferSize);
         this.serverListener = ZMQ.context(1).socket(SocketType.SUB);
         this.socketURL
                 = String.format("%s://%s:%s", socketProtocol, socketURL, socketPort);
@@ -51,11 +54,19 @@ public class ZMQServer implements Runnable {
     }
 
     public void subscribe(String topic) {
+        if (!isConnected) {
+            logger.log(Level.WARNING, "Tentativa de subscribe antes da conexão: {0}", topic);
+            return;
+        }
         logger.log(Level.INFO, "Subscribe: {0}", topic);
         this.serverListener.subscribe(topic);
     }
 
     public void unsubscribe(String topic) {
+        if (!isConnected) {
+            logger.log(Level.WARNING, "Tentativa de unsubscribe antes da conexão: {0}", topic);
+            return;
+        }
         this.serverListener.unsubscribe(topic);
     }
 
@@ -65,14 +76,21 @@ public class ZMQServer implements Runnable {
 
     @Override
     public void run() {
+        String response;
         logger.info("Estabelecendo conexão com o servidor ZMQ");
-        this.connectWithRetry(100, 5*1000);
+        this.connectWithRetry(100, 5 * 1000);
         while (!this.serverThread.isInterrupted()) {
             logger.info("CLIENT_TANGLE/ZMQ_SERVER - WAITING MESSAGE");
             byte[] reply = serverListener.recv(0);
-            String[] data = (new String(reply).split(" "));
+            response = new String(reply);
+            String[] data = response.split(" ");
 
-            this.putReceivedMessageBuffer(String.format("%s/%s", data[0], data[1]));
+            if (data.length == 2) {
+                this.putReceivedMessageBuffer(String.format("%s/%s", data[0], data[1]));
+            } else {
+                logger.log(Level.WARNING, "Mensagem malformada recebida do ZMQ (esperado 2 tokens, obtido {1}): {0}",
+                        new Object[]{response, data.length});
+            }
         }
         logger.info("CLIENT_TANGLE/ZMQ_SERVER - STOPED");
     }
@@ -87,15 +105,21 @@ public class ZMQServer implements Runnable {
 
     public void connectWithRetry(int maxRetries, int retryIntervalMs) {
         int attempts = 0;
-        boolean connected = false;
 
-        while (attempts < maxRetries && !connected) {
+        if (this.isConnected) {
+            logger.warning("Conexão já está ativa. Ignorando tentativa.");
+            return;
+        }
+
+        this.isConnected = false;
+
+        while (attempts < maxRetries && !isConnected) {
             try {
                 logger.log(Level.INFO, "Tentando conectar ao Servidor ZMQ: {0}", socketURL);
-                
                 this.serverListener.connect(socketURL);
+                this.serverListener.subscribe("");
                 logger.log(Level.INFO, "Conectado ao servidor ZMQ: {0}", socketURL);
-                connected = true;
+                this.isConnected = true;
             } catch (Exception e) {
                 attempts++;
                 logger.log(Level.SEVERE, "Falha ao conectar (tentativa {0}): {1}", new Object[]{attempts, e.getMessage()});
@@ -111,7 +135,7 @@ public class ZMQServer implements Runnable {
             }
         }
 
-        if (!connected) {
+        if (!this.isConnected) {
             throw new RuntimeException("Não foi possível conectar ao servidor ZMQ após " + maxRetries + " tentativas.");
         }
     }
