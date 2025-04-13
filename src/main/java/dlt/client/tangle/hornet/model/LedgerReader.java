@@ -224,23 +224,34 @@ public class LedgerReader implements ILedgerReader, Runnable {
                 }
             } catch (InterruptedException ex) {
                 logger.info(ex.getMessage());
-            } finally {
-                Thread.currentThread().interrupt();
             }
-
         }
         logger.info("CLIENT_TANGLE/DLT_INBOUND_MONITOR - STOPPED");
     }
 
     private void notifyAll(String topic, Object object, Object object2) {
+        Logger logger = Logger.getLogger(this.getClass().getName());
+
         if (topic == null || topic.isEmpty()) {
+            logger.warning("notifyAll: tópico nulo ou vazio. Ignorando notificação.");
             return;
         }
+
+        logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: processando notificações para o tópico: {0}", topic);
+
         Set<ILedgerSubscriber> subscribers = this.getSubscribers(topic);
+
         if (subscribers == null || subscribers.isEmpty()) {
+            logger.log(Level.WARNING, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: nenhum assinante encontrado para o tópico: {0}", topic);
             return;
         }
-        subscribers.forEach(sub -> sub.update(object, object2));
+
+        logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: número de assinantes para o tópico ''{0}'': {1}", new Object[]{topic, subscribers.size()});
+
+        subscribers.forEach(sub -> {
+            logger.log(Level.FINE, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: notificando assinante: {0}", sub.getClass().getSimpleName());
+            sub.update(object, object2);
+        });
     }
 
     private Set<ILedgerSubscriber> getSubscribers(String topic) {

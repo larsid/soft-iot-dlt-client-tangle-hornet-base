@@ -51,11 +51,6 @@ public class Transaction {
             String transactionJSON,
             boolean debugModeValue
     ) {
-        if (debugModeValue) {
-            logger.info("JSON Message");
-            logger.info(transactionJSON);
-        }
-
         JsonReader reader = new JsonReader(new StringReader(transactionJSON));
 
         reader.setLenient(true);

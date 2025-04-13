@@ -78,9 +78,11 @@ public class ZMQServer implements Runnable {
     public void run() {
         String response;
         logger.info("Estabelecendo conexão com o servidor ZMQ");
+        logger.log(Level.INFO, "Instância de ZmqServer: {0}", System.identityHashCode(this));
+
         this.connectWithRetry(100, 5 * 1000);
+        logger.info("CLIENT_TANGLE/ZMQ_SERVER - WAITING MESSAGE");
         while (!this.serverThread.isInterrupted()) {
-            logger.info("CLIENT_TANGLE/ZMQ_SERVER - WAITING MESSAGE");
             byte[] reply = serverListener.recv(0);
             response = new String(reply);
             String[] data = response.split(" ");
