@@ -14,12 +14,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +44,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
     public LedgerReader(String protocol, String url, int port) {
         this.urlApi = String.format("%s://%s:%s", protocol, url, port);
-        this.topics = new ConcurrentHashMap<>();
+        this.topics = new HashMap<>();
     }
 
     public void start() {
@@ -169,7 +168,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
         return null;
     }
-    
+
     @Override
     public void subscribe(String topic, ILedgerSubscriber subscriber) {
         if (topic != null) {
@@ -182,13 +181,14 @@ public class LedgerReader implements ILedgerReader, Runnable {
                 subscribers.add(subscriber);
             } else {
                 logger.log(Level.INFO, "Nenhum subscriber registrado ainda para o tópico: {0}. Criando novo conjunto.", topic);
-                subscribers = new ConcurrentSkipListSet<>();
+                subscribers = new HashSet<>();
                 subscribers.add(subscriber);
                 this.topics.put(topic, subscribers);
             }
         } else {
             logger.warning("Tentativa de inscrição com tópico nulo.");
         }
+        this.printTopics(topics);
     }
 
     @Override
@@ -242,8 +242,8 @@ public class LedgerReader implements ILedgerReader, Runnable {
             logger.warning("CLIENT_TANGLE/DLT_INBOUND_MONITOR: tópico nulo ou vazio. Ignorando notificação.");
             return;
         }
-
-        logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: processando notificações para o tópico: {0}", topic);
+        
+        this.printTopics(topics);
 
         Set<ILedgerSubscriber> subscribers = this.topics.getOrDefault(topic, new HashSet());
 
@@ -252,14 +252,12 @@ public class LedgerReader implements ILedgerReader, Runnable {
             return;
         }
 
-        logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: número de assinantes para o tópico ''{0}'': {1}", new Object[]{topic, subscribers.size()});
-
         subscribers.forEach(sub -> {
             logger.log(Level.FINE, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: notificando assinante: {0}", sub.getClass().getSimpleName());
             sub.update(object, object2);
         });
     }
-    
+
     public String getUrlApi() {
         return urlApi;
     }
@@ -274,5 +272,16 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
     public void setDebugModeValue(boolean debugModeValue) {
         this.debugModeValue = debugModeValue;
+    }
+
+    public void printTopics(Map<String, Set<ILedgerSubscriber>>  topics) {
+        if(topics.isEmpty()){
+            logger.info("Lista de tópicos está vazia.");
+        }
+        for (Map.Entry<String, Set<ILedgerSubscriber>> entry : topics.entrySet()) {
+            String key = entry.getKey();
+            int qty = entry.getValue().size();
+            logger.log(Level.INFO, "Chave: {0} | Quantidade de elementos: {1}", new Object[]{key, qty});
+        }
     }
 }
