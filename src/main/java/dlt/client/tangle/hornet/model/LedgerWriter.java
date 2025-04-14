@@ -43,8 +43,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
 
     public LedgerWriter(String protocol, String url, int port, int bufferSize) {
         this.urlApi = String.format("%s://%s:%s", protocol, url, port);
-        this.DLTOutboundBuffer
-                = new ArrayBlockingQueue<IndexTransaction>(bufferSize);
+        this.DLTOutboundBuffer = new ArrayBlockingQueue<>(bufferSize);
     }
 
     @Override

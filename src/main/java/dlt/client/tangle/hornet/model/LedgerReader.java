@@ -200,7 +200,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
     @Override
     public void run() {
-        logger.log(Level.INFO, "Instância de ZmqServer: {0}", System.identityHashCode(this));
+        logger.log(Level.INFO, "Instância de LedgerReader: {0}", System.identityHashCode(this));
 
         while (!this.DLTInboundMonitor.isInterrupted()) {
             try {
@@ -230,10 +230,9 @@ public class LedgerReader implements ILedgerReader, Runnable {
     }
 
     private void notifyAll(String topic, Object object, Object object2) {
-        Logger logger = Logger.getLogger(this.getClass().getName());
 
         if (topic == null || topic.isEmpty()) {
-            logger.warning("notifyAll: tópico nulo ou vazio. Ignorando notificação.");
+            logger.warning("CLIENT_TANGLE/DLT_INBOUND_MONITOR: tópico nulo ou vazio. Ignorando notificação.");
             return;
         }
 
@@ -263,7 +262,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
         for (Map.Entry<String, Set<ILedgerSubscriber>> entry : topics.entrySet()) {
             String registeredTopic = entry.getKey();
-            if (registeredTopic.matches(topic.replace("*", ".*"))) {
+            if (topic.matches(registeredTopic.replace("*", ".*"))) {
                 subscribers.addAll(entry.getValue());
             }
         }
