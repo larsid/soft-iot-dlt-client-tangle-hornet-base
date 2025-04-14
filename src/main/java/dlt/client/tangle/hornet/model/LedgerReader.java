@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -168,19 +169,25 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
         return null;
     }
-
+    
     @Override
     public void subscribe(String topic, ILedgerSubscriber subscriber) {
         if (topic != null) {
+            logger.log(Level.INFO, "Tentando se inscrever no tópico: {0}", topic);
+
             Set<ILedgerSubscriber> subscribers = this.topics.get(topic);
+
             if (subscribers != null) {
+                logger.log(Level.INFO, "Já existem subscribers para o tópico: {0}", topic);
                 subscribers.add(subscriber);
             } else {
+                logger.log(Level.INFO, "Nenhum subscriber registrado ainda para o tópico: {0}. Criando novo conjunto.", topic);
                 subscribers = new ConcurrentSkipListSet<>();
                 subscribers.add(subscriber);
                 this.topics.put(topic, subscribers);
-                this.server.subscribe(topic);
             }
+        } else {
+            logger.warning("Tentativa de inscrição com tópico nulo.");
         }
     }
 
@@ -238,7 +245,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
         logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: processando notificações para o tópico: {0}", topic);
 
-        Set<ILedgerSubscriber> subscribers = this.getSubscribers(topic);
+        Set<ILedgerSubscriber> subscribers = this.topics.getOrDefault(topic, new HashSet());
 
         if (subscribers == null || subscribers.isEmpty()) {
             logger.log(Level.WARNING, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: nenhum assinante encontrado para o tópico: {0}", topic);
@@ -252,23 +259,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
             sub.update(object, object2);
         });
     }
-
-    private Set<ILedgerSubscriber> getSubscribers(String topic) {
-        Set<ILedgerSubscriber> subscribers = new ConcurrentSkipListSet<>();
-
-        if (topics.containsKey(topic)) {
-            subscribers.addAll(topics.get(topic));
-        }
-
-        for (Map.Entry<String, Set<ILedgerSubscriber>> entry : topics.entrySet()) {
-            String registeredTopic = entry.getKey();
-            if (topic.matches(registeredTopic.replace("*", ".*"))) {
-                subscribers.addAll(entry.getValue());
-            }
-        }
-        return subscribers;
-    }
-
+    
     public String getUrlApi() {
         return urlApi;
     }
