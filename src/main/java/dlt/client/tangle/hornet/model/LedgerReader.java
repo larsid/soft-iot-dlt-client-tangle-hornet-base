@@ -188,7 +188,6 @@ public class LedgerReader implements ILedgerReader, Runnable {
         } else {
             logger.warning("Tentativa de inscrição com tópico nulo.");
         }
-        this.printTopics(topics);
     }
 
     @Override
@@ -243,8 +242,6 @@ public class LedgerReader implements ILedgerReader, Runnable {
             return;
         }
         
-        this.printTopics(topics);
-
         Set<ILedgerSubscriber> subscribers = this.topics.getOrDefault(topic, new HashSet());
 
         if (subscribers == null || subscribers.isEmpty()) {
@@ -253,7 +250,6 @@ public class LedgerReader implements ILedgerReader, Runnable {
         }
 
         subscribers.forEach(sub -> {
-            logger.log(Level.FINE, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: notificando assinante: {0}", sub.getClass().getSimpleName());
             sub.update(object, object2);
         });
     }
@@ -272,16 +268,5 @@ public class LedgerReader implements ILedgerReader, Runnable {
 
     public void setDebugModeValue(boolean debugModeValue) {
         this.debugModeValue = debugModeValue;
-    }
-
-    public void printTopics(Map<String, Set<ILedgerSubscriber>>  topics) {
-        if(topics.isEmpty()){
-            logger.info("Lista de tópicos está vazia.");
-        }
-        for (Map.Entry<String, Set<ILedgerSubscriber>> entry : topics.entrySet()) {
-            String key = entry.getKey();
-            int qty = entry.getValue().size();
-            logger.log(Level.INFO, "Chave: {0} | Quantidade de elementos: {1}", new Object[]{key, qty});
-        }
     }
 }
