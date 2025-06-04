@@ -44,6 +44,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     public LedgerWriter(String protocol, String url, int port, int bufferSize) {
         this.urlApi = String.format("%s://%s:%s", protocol, url, port);
         this.DLTOutboundBuffer = new ArrayBlockingQueue<>(bufferSize);
+        this.readDebugModeValue();
     }
 
     @Override
@@ -122,7 +123,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
             connection.setDoOutput(true);
 
             String requestBody = this.createPublishRequestBody(index, data);
-            
+
             try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
                 outputStream.writeBytes(requestBody);
                 outputStream.flush();
@@ -136,20 +137,18 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
             logger.log(Level.SEVERE, "Exception occurred while sending HTTP request: {0}", e.getMessage());
         }
     }
-    
-    private String createPublishRequestBody(String index, String data)
-    {
+
+    private String createPublishRequestBody(String index, String data) {
         String indexInHex = this.stringToHex(index);
-        String dataInHex = this.stringToHex(data);     
+        String dataInHex = this.stringToHex(data);
         return String.format(
-                    "{\"payload\":{\"index\": \"%s\",\"data\": \"%s\",\"type\":2}}",
-                    indexInHex,
-                    dataInHex
-            );
+                "{\"payload\":{\"index\": \"%s\",\"data\": \"%s\",\"type\":2}}",
+                indexInHex,
+                dataInHex
+        );
     }
-    
-    private String stringToHex(String string)
-    {
+
+    private String stringToHex(String string) {
         return string.chars()
                 .mapToObj(Integer::toHexString)
                 .collect(Collectors.joining());
@@ -158,7 +157,6 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     private void handleResponse(InputStream stream, String message, int responseCode) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
             String response = reader.lines().collect(Collectors.joining("\n"));
-            
 
             if (responseCode >= HTTP_OK && responseCode <= HTTP_PARTIAL) {
                 if (debugModeValue) {
@@ -178,6 +176,11 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Exception while reading response: {0}", e.getMessage());
         }
+    }
+
+    private void readDebugModeValue() {
+        String env = System.getenv("DEBUG_MODE_VALUE");
+        this.debugModeValue = env == null ? false : Boolean.parseBoolean(env);
     }
 
 }
