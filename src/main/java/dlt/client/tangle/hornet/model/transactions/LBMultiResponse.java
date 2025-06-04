@@ -9,6 +9,6 @@ import dlt.client.tangle.hornet.enums.TransactionType;
 public class LBMultiResponse extends TargetedTransaction {
 
   public LBMultiResponse(String source, String group, String target) {
-    super(source, group, TransactionType.LB_MULTI_DEVICE_RESPONSE, target);
+    super(source, group, TransactionType.LB_MULTI_RESPONSE, target);
   }
 }
