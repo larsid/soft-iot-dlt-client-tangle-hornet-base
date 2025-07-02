@@ -241,7 +241,7 @@ public class LedgerReader implements ILedgerReader, Runnable {
             logger.warning("CLIENT_TANGLE/DLT_INBOUND_MONITOR: tópico nulo ou vazio. Ignorando notificação.");
             return;
         }
-        
+
         Set<ILedgerSubscriber> subscribers = this.topics.getOrDefault(topic, new HashSet());
 
         if (subscribers == null || subscribers.isEmpty()) {
@@ -250,7 +250,15 @@ public class LedgerReader implements ILedgerReader, Runnable {
         }
 
         subscribers.forEach(sub -> {
-            sub.update(object, object2);
+            long startTime = System.nanoTime();
+
+            try {
+                sub.update(object, object2);
+            } finally {
+                long endTime = System.nanoTime();
+                long durationMs = (endTime - startTime) / 1_000_000;
+                logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: A execução do update para o assinante {0} no tópico ''{1}'' demorou {2} ms.", new Object[]{sub.getClass().getName(), topic, durationMs});
+            }
         });
     }
 

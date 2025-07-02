@@ -1,7 +1,9 @@
 package dlt.client.tangle.hornet.model;
 
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.zeromq.SocketType;
@@ -15,7 +17,7 @@ import org.zeromq.ZMQ;
 public class ZMQServer implements Runnable {
 
     private Thread serverThread;
-    private final BlockingQueue<String> DLTInboundBuffer;
+    private BlockingQueue<String> DLTInboundBuffer;
     private ZMQ.Socket serverListener;
     private String socketURL;
 
@@ -31,7 +33,6 @@ public class ZMQServer implements Runnable {
             String socketURL,
             String socketPort
     ) {
-        this.DLTInboundBuffer = new ArrayBlockingQueue<>(bufferSize);
         this.serverListener = ZMQ.context(1).socket(SocketType.SUB);
         this.socketURL
                 = String.format("%s://%s:%s", socketProtocol, socketURL, socketPort);
@@ -45,6 +46,7 @@ public class ZMQServer implements Runnable {
             this.serverThread.setName("CLIENT_TANGLE/ZMQ_SERVER");
             this.serverThread.start();
         }
+        this.DLTInboundBuffer = new ArrayBlockingQueue<>(this.readBufferSize());
     }
 
     public void stop() {
@@ -99,12 +101,13 @@ public class ZMQServer implements Runnable {
 
     private void putReceivedMessageBuffer(String receivedMessage) {
         try {
+            logger.log(Level.INFO, "Buffer size: {0}", this.DLTInboundBuffer.size());
             this.DLTInboundBuffer.put(receivedMessage);
         } catch (InterruptedException ex) {
             logger.severe(ex.getMessage());
+            Thread.currentThread().interrupt(); 
         }
     }
-
     public void connectWithRetry(int maxRetries, int retryIntervalMs) {
         int attempts = 0;
 
@@ -140,6 +143,13 @@ public class ZMQServer implements Runnable {
         if (!this.isConnected) {
             throw new RuntimeException("Não foi possível conectar ao servidor ZMQ após " + maxRetries + " tentativas.");
         }
+    }
+    
+    private Integer readBufferSize(){
+        return Optional.ofNullable(System.getenv("DLT_BUFFER_SIZE"))
+                .filter(Predicate.not(String::isEmpty))
+                .map(Integer::valueOf)
+                .orElse(1024);
     }
 
 }
