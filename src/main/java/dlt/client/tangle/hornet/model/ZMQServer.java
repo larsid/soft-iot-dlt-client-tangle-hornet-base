@@ -101,13 +101,16 @@ public class ZMQServer implements Runnable {
 
     private void putReceivedMessageBuffer(String receivedMessage) {
         try {
-            logger.log(Level.INFO, "Buffer size: {0}", this.DLTInboundBuffer.size());
             this.DLTInboundBuffer.put(receivedMessage);
+            if (!this.DLTInboundBuffer.isEmpty() && this.DLTInboundBuffer.size() > 1) {
+                logger.log(Level.INFO, "Buffer size: {0}", this.DLTInboundBuffer.size());
+            }
         } catch (InterruptedException ex) {
             logger.severe(ex.getMessage());
-            Thread.currentThread().interrupt(); 
+            Thread.currentThread().interrupt();
         }
     }
+
     public void connectWithRetry(int maxRetries, int retryIntervalMs) {
         int attempts = 0;
 
@@ -144,8 +147,8 @@ public class ZMQServer implements Runnable {
             throw new RuntimeException("Não foi possível conectar ao servidor ZMQ após " + maxRetries + " tentativas.");
         }
     }
-    
-    private Integer readBufferSize(){
+
+    private Integer readBufferSize() {
         return Optional.ofNullable(System.getenv("DLT_BUFFER_SIZE"))
                 .filter(Predicate.not(String::isEmpty))
                 .map(Integer::valueOf)

@@ -257,7 +257,9 @@ public class LedgerReader implements ILedgerReader, Runnable {
             } finally {
                 long endTime = System.nanoTime();
                 long durationMs = (endTime - startTime) / 1_000_000;
-                logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: A execução do update para o assinante {0} no tópico ''{1}'' demorou {2} ms.", new Object[]{sub.getClass().getName(), topic, durationMs});
+                if (durationMs > 2000) {
+                    logger.log(Level.INFO, "CLIENT_TANGLE/DLT_INBOUND_MONITOR: A execução do update para o assinante {0} no tópico ''{1}'' demorou {2} ms.", new Object[]{sub.getClass().getName(), topic, durationMs});
+                }
             }
         });
     }
