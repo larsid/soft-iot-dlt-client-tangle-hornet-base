@@ -78,7 +78,7 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     @Override
     public void run() {
         Gson gson = new Gson();
-
+        long startTime, endTime, durationMs;
         while (!this.DLTOutboundMonitor.isInterrupted()) {
             try {
                 IndexTransaction indexTransaction = this.DLTOutboundBuffer.take();
@@ -88,8 +88,16 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
                         .setPublishedAt(System.currentTimeMillis());
 
                 String transactionJson = gson.toJson(indexTransaction.getTransaction());
-
-                this.publishMessage(indexTransaction.getIndex(), transactionJson);
+                startTime = System.nanoTime();
+                try {
+                    this.publishMessage(indexTransaction.getIndex(), transactionJson);
+                } finally {
+                    endTime = System.nanoTime();
+                    durationMs = (endTime - startTime) / 1_000_000;
+                    if (durationMs > 2000) {
+                        logger.log(Level.INFO, "CLIENT_TANGLE/DLT_OUTBOUND_MONITOR: publish message duration: {0}", durationMs);
+                    }
+                }
             } catch (InterruptedException ex) {
                 this.DLTOutboundMonitor.interrupt();
             }
@@ -105,6 +113,9 @@ public class LedgerWriter implements ILedgerWriter, Runnable {
     public void put(IndexTransaction indexTransaction)
             throws InterruptedException {
         this.DLTOutboundBuffer.put(indexTransaction);
+        if (debugModeValue) {
+            logger.log(Level.INFO, "Outbound queue size: {0}", this.DLTOutboundBuffer.size());
+        }
     }
 
     /**
